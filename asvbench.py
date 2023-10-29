@@ -8,7 +8,7 @@ from benchadapt.result import BenchmarkResult
 
 class AsvBenchmarkAdapter(BenchmarkAdapter):
 
-    result_dir: Path
+    #result_dir: Path
 
     def __init__(
         self,
@@ -21,9 +21,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         Parameters
         ----------
         command : List[str]
-            A list of strings defining a shell command to run folly benchmarks
+            A list of strings defining a shell command to run benchmarks
         result_dir : Path
-            Path to directory where folly results will be populated
+            Path to directory where results will be populated
         result_fields_override : Dict[str, Any]
             A dict of values to override on each instance of `BenchmarkResult`. Useful
             for specifying metadata only available at runtime, e.g. build info. Applied
@@ -54,9 +54,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                         "iterations": 1,
                     },
                     tags={"name": "benchmarks.TimeSuite.time_insertion_sort", 
-                          "suite": "suite", 
-                          "source": "cpp-micro"},
-                    info={},
+                    },
                     context={"benchmark_language": "Python"},
             
         )
