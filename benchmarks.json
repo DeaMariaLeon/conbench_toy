@@ -1,0 +1,18 @@
+{
+    "benchmarks.TimeSuite.time_insertion_sort": {
+        "code": "class TimeSuite:\n    def time_insertion_sort(self):\n        sort(self.array)\n\n    def setup(self):\n        LENGTH = 10\n        #random.seed(10)\n        self.array = [random.randint(0, 1000) for i in range(LENGTH)]",
+        "min_run_count": 2,
+        "name": "benchmarks.TimeSuite.time_insertion_sort",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "1198fba41755fd157a0c7f7bc588ee00d3c4b577d482adc3cf034d8476f03f50",
+        "warmup_time": -1
+    },
+    "version": 2
+}
