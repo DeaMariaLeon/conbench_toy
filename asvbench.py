@@ -44,22 +44,37 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
  
     def _transform_results(self) -> List[BenchmarkResult]:
         
-        parsed_benchmark = BenchmarkResult(
-            batch_id="A",
-                    stats={
-                        "data": [4.789694385535404e-07],
-                        "unit": "ns",
-                        "times": [4.789694385535404e-07],
-                        "time_unit": "s",
-                        "iterations": 1,
-                    },
-                    tags={"name": "benchmarks.TimeSuite.time_insertion_sort", 
-                    },
-                    context={"benchmark_language": "Python"},
+        parsed_benchmarks = []
+        #with open("benchmarks.json") as f:
+        with open("a83f6aae-pandas2.json") as f:
+            raw_json = json.load(f)
+        
+        result_col = {col_name:value for value, 
+                      col_name in enumerate(raw_json["result_columns"])}
+        names = raw_json["results"].keys()
+        #print(names)
+        for n in names: 
+            parsed_benchmark = BenchmarkResult(
+                batch_id="A",
+                stats={
+                    "data": raw_json["results"][n][result_col['result']],
+                    "unit": "s",
+                    "times": raw_json["results"][n][result_col['result']],
+                    "time_unit": "s",
+                    "iterations": 1,
+                },
+                tags={"name": n, 
+                },
+                context={"benchmark_language": "Python"},
+                github={"repository": "git@github.com:pandas-dev/pandas",
+                        "commit":raw_json["commit_hash"],
+                        },
+                
+            )
             
-        )
+            parsed_benchmarks.append(parsed_benchmark)
 
-        return [parsed_benchmark]       
+        return parsed_benchmarks     
 
 # asv_result = {"commit_hash": "cb63287e63db10ce3eb0f3b8c279fd995678d0ae", 
 #               "env_name": "conda-py3.11", 
