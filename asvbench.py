@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
+#from benchrun import Benchmark, BenchmarkList, CaseList, Iteration
 
 class AsvBenchmarkAdapter(BenchmarkAdapter):
 
@@ -45,15 +46,22 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
     def _transform_results(self) -> List[BenchmarkResult]:
         
         parsed_benchmarks = []
+        
         #with open("benchmarks.json") as f:
-        with open("a83f6aae-pandas2.json") as f:
+        #with open("a83f6aae-pandas2.json") as f:
+        with open("pandas3-2benchmarks.json") as f:
             raw_json = json.load(f)
         
         result_col = {col_name:value for value, 
                       col_name in enumerate(raw_json["result_columns"])}
         names = raw_json["results"].keys()
         #print(names)
-        for n in names: 
+        for n in names:
+            params = raw_json["results"][n][result_col['params']]
+            for case in params:
+                print(case, n)
+
+            
             parsed_benchmark = BenchmarkResult(
                 batch_id="A",
                 stats={
@@ -71,9 +79,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                         },
                 
             )
-            
+            print(parsed_benchmark.to_publishable_dict())
             parsed_benchmarks.append(parsed_benchmark)
-
+            
         return parsed_benchmarks     
 
 # asv_result = {"commit_hash": "cb63287e63db10ce3eb0f3b8c279fd995678d0ae", 

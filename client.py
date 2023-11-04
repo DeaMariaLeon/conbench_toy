@@ -14,6 +14,6 @@ adapter = AsvBenchmarkAdapter(
 )
 
 adapter.run()
-#adapter()
-print(adapter.results)
-adapter.post_results()
+
+#print(adapter.results)
+#adapter.post_results()
