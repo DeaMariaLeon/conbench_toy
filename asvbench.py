@@ -5,7 +5,6 @@ from typing import Any, Dict, List
 
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
-#from benchrun import Benchmark, BenchmarkList, CaseList, Iteration
 
 class AsvBenchmarkAdapter(BenchmarkAdapter):
 
@@ -43,6 +42,8 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
             result_fields_append=result_fields_append,
         )
  
+    
+    
     def _transform_results(self) -> List[BenchmarkResult]:
         
         parsed_benchmarks = []
@@ -50,36 +51,42 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         #with open("benchmarks.json") as f:
         #with open("a83f6aae-pandas2.json") as f:
         with open("pandas3-2benchmarks.json") as f:
-            raw_json = json.load(f)
+            benchmarks_results = json.load(f)
         
-        result_col = {col_name:value for value, 
-                      col_name in enumerate(raw_json["result_columns"])}
-        names = raw_json["results"].keys()
+        with open("benchmarks.json") as f:
+            benchmarks_info = json.load(f)
+        
+
+        names = benchmarks_results["results"].keys()
         #print(names)
         for n in names:
-            params = raw_json["results"][n][result_col['params']]
-            for case in params:
-                print(case, n)
+            bench = dict(zip(benchmarks_results["result_columns"], 
+                         benchmarks_results["results"][n]))
+            param_names = benchmarks_info[n]['param_names']
+            param_values = benchmarks_info[n]['params']
+            param_dic = dict(zip(param_names, param_values))
 
-            
+            tags = {}
+            tags["name"] = n
+            tags.update(param_dic)
+            print("AQUI",tags)
             parsed_benchmark = BenchmarkResult(
                 batch_id="A",
                 stats={
-                    "data": raw_json["results"][n][result_col['result']],
+                    "data": bench["result"],
                     "unit": "s",
-                    "times": raw_json["results"][n][result_col['result']],
+                    "times": bench["result"],
                     "time_unit": "s",
                     "iterations": 1,
                 },
-                tags={"name": n, 
-                },
+                tags={"name": n},
                 context={"benchmark_language": "Python"},
                 github={"repository": "git@github.com:pandas-dev/pandas",
-                        "commit":raw_json["commit_hash"],
+                        "commit":benchmarks_results["commit_hash"],
                         },
                 
             )
-            print(parsed_benchmark.to_publishable_dict())
+            #print(parsed_benchmark.to_publishable_dict())
             parsed_benchmarks.append(parsed_benchmark)
             
         return parsed_benchmarks     
