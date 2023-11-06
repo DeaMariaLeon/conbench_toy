@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import Any, Dict, List
+import itertools
 
 
 from benchadapt.adapters._adapter import BenchmarkAdapter
@@ -64,30 +65,34 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                          benchmarks_results["results"][n]))
             param_names = benchmarks_info[n]['param_names']
             param_values = benchmarks_info[n]['params']
-            param_dic = {'unique': 'True', 'keep': "'first'", 'dtype': "'int'"}
+            combinations = [p for p in itertools.product(*param_values)]
+            combinations_num = len(combinations)
+            #print(combinations_num)
+            for i in range(combinations_num):
+                param_dic = dict(zip(param_names,combinations[i]))
+                #print(i, param_dic, bench["result"][i])
 
-            tags = {}
-            tags["name"] = n
-            tags.update(param_dic)
-            print("AQUI",tags)
-            parsed_benchmark = BenchmarkResult(
-                batch_id="A",
-                stats={
-                    "data": bench["result"],
-                    "unit": "s",
-                    "times": bench["result"],
-                    "time_unit": "s",
-                    "iterations": 1,
-                },
-                tags=tags,
-                context={"benchmark_language": "Python"},
-                github={"repository": "git@github.com:pandas-dev/pandas",
-                        "commit":benchmarks_results["commit_hash"],
-                        },
-                
-            )
-            #print(parsed_benchmark.to_publishable_dict())
-            parsed_benchmarks.append(parsed_benchmark)
+                tags = {}
+                tags["name"] = n
+                tags.update(param_dic)
+                parsed_benchmark = BenchmarkResult(
+                    batch_id="A",
+                    stats={
+                        "data": [bench["result"][i]],
+                        "unit": "s",
+                        "times": [bench["result"][i]],
+                        "time_unit": "s",
+                        "iterations": 1,
+                    },
+                    tags=tags,
+                    context={"benchmark_language": "Python"},
+                    github={"repository": "git@github.com:pandas-dev/pandas",
+                            "commit":benchmarks_results["commit_hash"],
+                            },
+                    
+                )
+                #print(parsed_benchmark.to_publishable_dict())
+                parsed_benchmarks.append(parsed_benchmark)
             
         return parsed_benchmarks     
 
