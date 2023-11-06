@@ -64,7 +64,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                          benchmarks_results["results"][n]))
             param_names = benchmarks_info[n]['param_names']
             param_values = benchmarks_info[n]['params']
-            param_dic = dict(zip(param_names, param_values))
+            param_dic = {'unique': 'True', 'keep': "'first'", 'dtype': "'int'"}
 
             tags = {}
             tags["name"] = n
@@ -79,7 +79,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     "time_unit": "s",
                     "iterations": 1,
                 },
-                tags={"name": n},
+                tags=tags,
                 context={"benchmark_language": "Python"},
                 github={"repository": "git@github.com:pandas-dev/pandas",
                         "commit":benchmarks_results["commit_hash"],
