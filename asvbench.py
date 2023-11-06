@@ -51,7 +51,8 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         
         #with open("benchmarks.json") as f:
         #with open("a83f6aae-pandas2.json") as f:
-        with open("pandas3-2benchmarks.json") as f:
+        #with open("pandas3-2benchmarks.json") as f:
+        with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
             benchmarks_results = json.load(f)
         
         with open("benchmarks.json") as f:
@@ -62,15 +63,14 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         #print(names)
         for n in names:
             bench = dict(zip(benchmarks_results["result_columns"], 
-                         benchmarks_results["results"][n]))
+                             benchmarks_results["results"][n]))
             param_names = benchmarks_info[n]['param_names']
             param_values = benchmarks_info[n]['params']
             combinations = [p for p in itertools.product(*param_values)]
-            combinations_num = len(combinations)
-            #print(combinations_num)
-            for i in range(combinations_num):
+        
+            for i in range(len(combinations)):
                 param_dic = dict(zip(param_names,combinations[i]))
-                #print(i, param_dic, bench["result"][i])
+                print(i, param_dic, bench["result"][i])
 
                 tags = {}
                 tags["name"] = n
@@ -78,10 +78,10 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                 parsed_benchmark = BenchmarkResult(
                     batch_id="A",
                     stats={
-                        "data": [bench["result"][i]],
-                        "unit": "s",
-                        "times": [bench["result"][i]],
-                        "time_unit": "s",
+                        "data": data,
+                        "unit": "s", #CORRECT THIS
+                        "times": data,
+                        "time_unit": benchmarks_info[n]['unit'],
                         "iterations": 1,
                     },
                     tags=tags,
@@ -91,23 +91,11 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                             },
                     
                 )
-                #print(parsed_benchmark.to_publishable_dict())
+                
                 parsed_benchmarks.append(parsed_benchmark)
-            
+        
+        #with open("parsed_benchmarks.json", "w") as f:
+        #    json.dump(parsed_benchmarks, f)
+
         return parsed_benchmarks     
 
-# asv_result = {"commit_hash": "cb63287e63db10ce3eb0f3b8c279fd995678d0ae", 
-#               "env_name": "conda-py3.11", 
-#               "date": 1696315841000, 
-#               "params": {"arch": "arm64", 
-#                          "cpu": "Apple M2", 
-#                          "machine": "Deas-MacBook-Air.local", 
-#                          "num_cpu": "8", 
-#                          "os": "macOS 13.5.1 (22G90)", 
-#                          "ram": "16GB", 
-#                          "python": "3.11"}, 
-#               "python": "3.11", 
-#               "requirements": {}, 
-#               "env_vars": {}, 
-#               "result_columns": ["result", "params", "version", "started_at", "duration", "stats_ci_99_a", "stats_ci_99_b", "stats_q_25", "stats_q_75", "stats_number", "stats_repeat", "samples", "profile"], 
-#               "results": {"benchmarks.TimeSuite.time_insertion_sort": [[4.789694385535404e-07], [], "1198fba41755fd157a0c7f7bc588ee00d3c4b577d482adc3cf034d8476f03f50", 1697559305660, 0.40301, [4.7191e-07], [4.8881e-07], [4.7676e-07], [4.8181e-07], [22921], [10]]}, "durations": {}, "version": 2}
