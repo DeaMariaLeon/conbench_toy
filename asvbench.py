@@ -49,10 +49,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         
         parsed_benchmarks = []
         
-        #with open("benchmarks.json") as f:
         #with open("a83f6aae-pandas2.json") as f:
-        #with open("pandas3-2benchmarks.json") as f:
-        with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
+        with open("pandas3-2benchmarks.json") as f:
+        #with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
             benchmarks_results = json.load(f)
         
         with open("benchmarks.json") as f:
@@ -60,42 +59,46 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         
 
         names = benchmarks_results["results"].keys()
-        #print(names)
+        no_results = []
         for n in names:
-            bench = dict(zip(benchmarks_results["result_columns"], 
-                             benchmarks_results["results"][n]))
+            #bench = dict(zip(benchmarks_results["result_columns"], 
+            #                 benchmarks_results["results"][n]))
             param_names = benchmarks_info[n]['param_names']
             param_values = benchmarks_info[n]['params']
             combinations = [p for p in itertools.product(*param_values)]
         
             for i in range(len(combinations)):
                 param_dic = dict(zip(param_names,combinations[i]))
-                print(i, param_dic, bench["result"][i])
+                
 
                 tags = {}
                 tags["name"] = n
                 tags.update(param_dic)
-                parsed_benchmark = BenchmarkResult(
-                    batch_id="A",
-                    stats={
-                        "data": data,
-                        "unit": "s", #CORRECT THIS
-                        "times": data,
-                        "time_unit": benchmarks_info[n]['unit'],
-                        "iterations": 1,
-                    },
-                    tags=tags,
-                    context={"benchmark_language": "Python"},
-                    github={"repository": "git@github.com:pandas-dev/pandas",
-                            "commit":benchmarks_results["commit_hash"],
-                            },
-                    
-                )
-                
-                parsed_benchmarks.append(parsed_benchmark)
-        
-        #with open("parsed_benchmarks.json", "w") as f:
-        #    json.dump(parsed_benchmarks, f)
 
+                if (benchmarks_results["results"][n][0]):
+                    data = [benchmarks_results["results"][n][0][i]]
+                    parsed_benchmark = BenchmarkResult(
+                        batch_id="A",
+                        stats={
+                            "data": data,
+                            "unit": "s", #CORRECT THIS
+                            "times": data,
+                            "time_unit": benchmarks_info[n]['unit'],
+                            "iterations": 1,
+                        },
+                        tags=tags,
+                        context={"benchmark_language": "Python"},
+                        github={"repository": "git@github.com:pandas-dev/pandas",
+                                "commit":benchmarks_results["commit_hash"],
+                                },
+                        
+                    )
+                    print(data)
+                    parsed_benchmarks.append(parsed_benchmark)
+                    
+                else:
+                    no_results.append(benchmarks_results["results"][n])
+                
+        print(no_results)
         return parsed_benchmarks     
 
