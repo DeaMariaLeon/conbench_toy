@@ -68,7 +68,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
             param_names = settings_file[name]['param_names']
             param_values = settings_file[name]['params']
             combinations = [p for p in itertools.product(*param_values)]
-            print(len(combinations))
+            #print(len(combinations))
             
             #for i in range(len(raw_json["results"][name])):
             for i, combination in enumerate(combinations):
