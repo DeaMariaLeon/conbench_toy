@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 import itertools
-
+import numpy as np
 
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
@@ -50,31 +50,41 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         parsed_benchmarks = []
         
         #with open("a83f6aae-pandas2.json") as f:
-        #with open("pandas3-2benchmarks.json") as f:
+        with open("pandas3-2benchmarks.json") as f:
         #with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        with open("6493d2a4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
+        #with open("6493d2a4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
         #with open("6493d2a4-modified.json") as f:
+        #with open("/Users/dealeon/Documents/algos2/.asv/results/Deas-MacBook-Air.local/cb63287e-conda-py3.11.json") as f:
             raw_json = json.load(f)
         
         with open("benchmarks.json") as f:
+        #with open("/Users/dealeon/Documents/algos2/.asv/results/benchmarks.json") as f:
             settings_file = json.load(f)
         names = raw_json["results"].keys()
         no_results = []
+        failing = []
         for name in names:  
-            if len(raw_json["results"][name]) < 11:
-                continue
-               
+            #print(name)   
             param_names = settings_file[name]['param_names']
             param_values = settings_file[name]['params']
             combinations = [p for p in itertools.product(*param_values)]
-           
-            for i in range(len(combinations)):
+            print(len(combinations))
+            
+            #for i in range(len(raw_json["results"][name])):
+            for i, combination in enumerate(combinations):
+                #print(raw_json["results"][name][0][0])
+                #print(i)
                 if (raw_json["results"][name][0]):
-                    param_dic = dict(zip(param_names,combinations[i]))
+                    data = [raw_json["results"][name][0][i]]
+                    #print(i, combinations[i],data)
+                    if np.isnan(data):
+                        failing.append(name)
+                        continue
+
+                    param_dic = dict(zip(param_names,combination))
                     tags = {}
                     tags["name"] = name
                     tags.update(param_dic)
-                    data = [raw_json["results"][name][0][i]]
                     parsed_benchmark = BenchmarkResult(
                         batch_id="A",
                         stats={
@@ -92,7 +102,10 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     )
                     parsed_benchmarks.append(parsed_benchmark)            
                 else:
-                    no_results.append(raw_json["results"][name])
-        #print(no_results)
+                    no_results.append(name)
+                
+        print(f'{failing=}')
+        print(f'{no_results=}')
+
         return parsed_benchmarks     
 
