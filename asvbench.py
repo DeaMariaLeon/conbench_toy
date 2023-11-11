@@ -50,8 +50,8 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         parsed_benchmarks = []
         
         #with open("a83f6aae-pandas2.json") as f:
-        #with open("pandas3-2benchmarks.json") as f:
-        with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
+        with open("pandas3-2benchmarks.json") as f:
+        #with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
         #with open("6493d2a4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
         #with open("6493d2a4-modified.json") as f:
         #with open("/Users/dealeon/Documents/algos2/.asv/results/Deas-MacBook-Air.local/cb63287e-conda-py3.11.json") as f:
@@ -66,32 +66,25 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         # In this first version of the adapter we are going to use below only the "result" column. 
         # TODO: use the "samples" column instead.
         result_columns = benchmarks_results["result_columns"]
-        
+
         no_results = []
-        failing = []
-      
-        
+        failing = []     
         for name in benchmarks_results["results"]:
             #Bug with this benchmark: series_methods.ToFrame.time_to_frame
             if name == "series_methods.ToFrame.time_to_frame":
                 continue
             print(name)
-
-            try:
-            
+            try:     
                 result_dict = dict(zip(result_columns, 
                                 benchmarks_results["results"][name]))
-    
                 for param_values, data in zip(
                     itertools.product(*result_dict["params"]),
                     result_dict['result']
                     ):
-     
                     if np.isnan(data):
                             failing.append(name)
                             print('failing ', name)
-                            continue
-    
+                            continue   
                     param_dic = dict(zip(benchmarks_info[name]["param_names"],
                                      param_values))      
                     tags = {}
@@ -112,8 +105,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                                 "commit":benchmarks_results["commit_hash"],
                                 },
                     )
-                    parsed_benchmarks.append(parsed_benchmark)
-                              
+                    parsed_benchmarks.append(parsed_benchmark)                        
             except:
                     no_results.append(name)
                 
