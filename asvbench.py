@@ -63,25 +63,22 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         names = raw_json["results"].keys()
         no_results = []
         failing = []
-        for name in names:  
-            #print(name)   
+        none_in_param = []
+        
+        for name in names:
+            #Bug with this benchmark: series_methods.ToFrame.time_to_frame
+            if name == "series_methods.ToFrame.time_to_frame":
+                continue
+            print(name)
+            result_list = raw_json["results"][name][0]
             param_names = settings_file[name]['param_names']
-            param_values = settings_file[name]['params']
-            combinations = [p for p in itertools.product(*param_values)]
-            #print(len(combinations))
-            
-            #for i in range(len(raw_json["results"][name])):
-            for i, combination in enumerate(combinations):
-                #print(raw_json["results"][name][0][0])
-                #print(i)
-                if (raw_json["results"][name][0]):
-                    data = [raw_json["results"][name][0][i]]
-                    #print(i, combinations[i],data)
-                    if np.isnan(data):
-                        failing.append(name)
-                        continue
-
-                    param_dic = dict(zip(param_names,combination))
+            param_values = raw_json["results"][name][1]
+            combinations = [p for p in itertools.product(*param_values)]            
+            nan = None
+            if result_list and not np.isnan(result_list).any():
+                for i, result in enumerate(result_list):       
+                    data = [result]
+                    param_dic = dict(zip(param_names,combinations[i]))
                     tags = {}
                     tags["name"] = name
                     tags.update(param_dic)
@@ -98,14 +95,14 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                         context={"benchmark_language": "Python"},
                         github={"repository": "git@github.com:pandas-dev/pandas",
                                 "commit":raw_json["commit_hash"],
-                                },                    
+                                },
                     )
-                    parsed_benchmarks.append(parsed_benchmark)            
-                else:
-                    no_results.append(name)
+                    parsed_benchmarks.append(parsed_benchmark)
+                          
+            else:
+                no_results.append(name)
                 
-        print(f'{failing=}')
         print(f'{no_results=}')
 
-        return parsed_benchmarks     
+        return parsed_benchmarks
 
