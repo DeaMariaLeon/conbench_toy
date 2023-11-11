@@ -50,59 +50,83 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         parsed_benchmarks = []
         
         #with open("a83f6aae-pandas2.json") as f:
-        with open("pandas3-2benchmarks.json") as f:
-        #with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
+        #with open("pandas3-2benchmarks.json") as f:
+        with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
         #with open("6493d2a4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
         #with open("6493d2a4-modified.json") as f:
         #with open("/Users/dealeon/Documents/algos2/.asv/results/Deas-MacBook-Air.local/cb63287e-conda-py3.11.json") as f:
-            raw_json = json.load(f)
+            benchmarks_results = json.load(f)
         
         with open("benchmarks.json") as f:
-        #with open("/Users/dealeon/Documents/algos2/.asv/results/benchmarks.json") as f:
-            settings_file = json.load(f)
-        names = raw_json["results"].keys()
+            benchmarks_info = json.load(f)
+        
+        # From asv documention "result_columns" is a list of column names for the results dictionary. 
+        # ["result", "params", "version", "started_at", "duration", "stats_ci_99_a", "stats_ci_99_b", 
+        # "stats_q_25", "stats_q_75", "stats_number", "stats_repeat", "samples", "profile"] 
+        # In this first version of the adapter we are going to use below only the "result" column. 
+        # TODO: use the "samples" column instead.
+        result_columns = benchmarks_results["result_columns"]
+        
         no_results = []
         failing = []
-        none_in_param = []
+      
         
-        for name in names:
+        for name in benchmarks_results["results"]:
             #Bug with this benchmark: series_methods.ToFrame.time_to_frame
             if name == "series_methods.ToFrame.time_to_frame":
                 continue
             print(name)
-            result_list = raw_json["results"][name][0]
-            param_names = settings_file[name]['param_names']
-            param_values = raw_json["results"][name][1]
-            combinations = [p for p in itertools.product(*param_values)]            
-            nan = None
-            if result_list and not np.isnan(result_list).any():
-                for i, result in enumerate(result_list):       
-                    data = [result]
-                    param_dic = dict(zip(param_names,combinations[i]))
+
+            try:
+            
+                result_dict = dict(zip(result_columns, 
+                                benchmarks_results["results"][name]))
+    
+                for param_values, data in zip(
+                    itertools.product(*result_dict["params"]),
+                    result_dict['result']
+                    ):
+     
+                    if np.isnan(data):
+                            failing.append(name)
+                            print('failing ', name)
+                            continue
+    
+                    param_dic = dict(zip(benchmarks_info[name]["param_names"],
+                                     param_values))      
                     tags = {}
                     tags["name"] = name
                     tags.update(param_dic)
                     parsed_benchmark = BenchmarkResult(
-                        batch_id="A",
+                        batch_id="A", #CORRECT THIS
                         stats={
-                            "data": data,
+                            "data": [data],
                             "unit": "s", #CORRECT THIS
-                            "times": data,
-                            "time_unit": settings_file[name]['unit'],
+                            "times": [data],
+                            "time_unit": benchmarks_info[name]['unit'],
                             "iterations": 1,
                         },
                         tags=tags,
                         context={"benchmark_language": "Python"},
                         github={"repository": "git@github.com:pandas-dev/pandas",
-                                "commit":raw_json["commit_hash"],
+                                "commit":benchmarks_results["commit_hash"],
                                 },
                     )
                     parsed_benchmarks.append(parsed_benchmark)
-                          
-            else:
-                no_results.append(name)
+                              
+            except:
+                    no_results.append(name)
                 
-        print(f'{no_results=}')
+        #save benchmark names which did not work for debugging
+        with open("noresults", "a") as no_f:
+            no_f.write(benchmarks_results["commit_hash"])
+            no_f.write("\n")
+            no_f.write("\n".join(set(no_results)))  
+                  
+        with open("failing", "a") as failing_f:
+            failing_f.write(benchmarks_results["commit_hash"])
+            failing_f.write("\n")
+            failing_f.write("\n".join(set(failing))) 
 
         return parsed_benchmarks
 
