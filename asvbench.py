@@ -49,12 +49,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         
         parsed_benchmarks = []
         
-        #with open("a83f6aae-pandas2.json") as f:
-        with open("pandas3-2benchmarks.json") as f:
-        #with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        #with open("6493d2a4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        #with open("6493d2a4-modified.json") as f:
-        #with open("/Users/dealeon/Documents/algos2/.asv/results/Deas-MacBook-Air.local/cb63287e-conda-py3.11.json") as f:
+        with open("c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
             benchmarks_results = json.load(f)
         
         with open("benchmarks.json") as f:
@@ -63,7 +58,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         # From asv documention "result_columns" is a list of column names for the results dictionary. 
         # ["result", "params", "version", "started_at", "duration", "stats_ci_99_a", "stats_ci_99_b", 
         # "stats_q_25", "stats_q_75", "stats_number", "stats_repeat", "samples", "profile"] 
-        # In this first version of the adapter we are going to use below only the "result" column. 
+        # In this first version of the adapter we are using only the "result" column. 
         # TODO: use the "samples" column instead.
         result_columns = benchmarks_results["result_columns"]
 
