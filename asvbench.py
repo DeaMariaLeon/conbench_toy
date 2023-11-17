@@ -51,8 +51,8 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         parsed_benchmarks = []
         
         #with open("/Users/dealeon/conbench_toy/asv_files/0cdb37c4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        with open("/Users/dealeon/conbench_toy/asv_files/c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        #with open("/Users/dealeon/conbench_toy/asv_files/dd7441bd-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
+        #with open("/Users/dealeon/conbench_toy/asv_files/c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
+        with open("/Users/dealeon/conbench_toy/asv_files/dd7441bd-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
         #with open("/Users/dealeon/conbench_toy/asv_files/pandas3-2benchmarks.json") as f:
         #with open("/Users/dealeon/conbench_toy/asv_files/6493d2a4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
         #with open(self.result_dir) as f:
@@ -122,7 +122,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                         context={"benchmark_language": "Python",
                                  "env_name": benchmarks_results["env_name"],
                                  "date": str(datetime.fromtimestamp(benchmarks_results["date"]/1e3)),
-                                 "params": params,
+                                 #"params": params,
                                  "python": benchmarks_results["python"],
                                  "requirements": benchmarks_results["requirements"],
                                  },
