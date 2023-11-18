@@ -10,12 +10,10 @@ from benchadapt.result import BenchmarkResult
 
 class AsvBenchmarkAdapter(BenchmarkAdapter):
 
-    #result_dir: Path
-
     def __init__(
         self,
         command: List[str],
-        result_dir: Path,
+        result_file: Path,
         result_fields_override: Dict[str, Any] = None,
         result_fields_append: Dict[str, Any] = None,        
     ) -> None:
@@ -37,25 +35,18 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
             element, will override any keys that already exist, i.e. it does not append
             recursively.
         """
-        self.result_dir = Path(result_dir)
+        self.result_file = result_file
         super().__init__(
             command=command,
             result_fields_override=result_fields_override,
             result_fields_append=result_fields_append,
         )
- 
-    
     
     def _transform_results(self) -> List[BenchmarkResult]:
-        
+        """Transform asv results into a list of BenchmarkResults instances"""
         parsed_benchmarks = []
         
-        #with open("/Users/dealeon/conbench_toy/asv_files/0cdb37c4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        #with open("/Users/dealeon/conbench_toy/asv_files/c2cdeaf3-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        with open("/Users/dealeon/conbench_toy/asv_files/dd7441bd-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        #with open("/Users/dealeon/conbench_toy/asv_files/pandas3-2benchmarks.json") as f:
-        #with open("/Users/dealeon/conbench_toy/asv_files/6493d2a4-env-36436ace7d7eead1c76ef118fd27f1fa.json") as f:
-        #with open(self.result_dir) as f:
+        with open(self.result_file, "r") as f:
 
             benchmarks_results = json.load(f)
         
@@ -122,7 +113,6 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                         context={"benchmark_language": "Python",
                                  "env_name": benchmarks_results["env_name"],
                                  "date": str(datetime.fromtimestamp(benchmarks_results["date"]/1e3)),
-                                 #"params": params,
                                  "python": benchmarks_results["python"],
                                  "requirements": benchmarks_results["requirements"],
                                  },
