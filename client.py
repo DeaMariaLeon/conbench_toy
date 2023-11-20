@@ -18,15 +18,11 @@ def adapter_instance(file_to_read):
     adapter.post_results()
 
 benchmarks_path = Path("./asv_files")
-asv_files = list(benchmarks_path.glob('*.json'))
-with open("asv_files_read", "r+") as f:
-    processed_files = f.read()
-    for file in asv_files:
-        file_to_read = str(file)
-        if file_to_read not in processed_files:
-            print(file_to_read)
-            adapter_instance(file_to_read)
-            f.write(file_to_read)
-            f.write("\n")
+all_files = [str(file) for file in benchmarks_path.glob('*.json')]
 
-#innocent-registration-key
+with open("asv_files_read", "r+") as f:
+    processed_files = f.read().split('\n')
+    for new_file in (set(all_files) - set(processed_files)):
+        adapter_instance(new_file)
+        f.write(new_file)
+        f.write("\n")
