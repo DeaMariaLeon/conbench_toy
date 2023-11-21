@@ -56,17 +56,19 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         parsed_benchmarks, no_results, failing = self._parse_results(benchmarks_results, benchmarks_info)
 
         #save benchmark names which did not work for debugging
-        with open("noresults", "a") as no_f:
-            no_f.write("\n")
-            no_f.write(benchmarks_results["commit_hash"])
-            no_f.write("\n")
-            no_f.write("\n".join(set(no_results)))  
-                  
-        with open("failing", "a") as failing_f:
-            failing_f.write("\n")
-            failing_f.write(benchmarks_results["commit_hash"])
-            failing_f.write("\n")
-            failing_f.write("\n".join(set(failing))) 
+        if no_results:
+            with open("noresults", "a") as no_f:
+                no_f.write("\n")
+                no_f.write(benchmarks_results["commit_hash"])
+                no_f.write("\n")
+                no_f.write("\n".join(set(no_results)))
+        
+        if failing:
+            with open("failing", "a") as failing_f:
+                failing_f.write("\n")
+                failing_f.write(benchmarks_results["commit_hash"])
+                failing_f.write("\n")
+                failing_f.write("\n".join(set(failing))) 
 
         return parsed_benchmarks
 
@@ -101,14 +103,14 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     tags = {}
                     tags["name"] = name
                     tags.update(param_dic)
+                    units = {"seconds": "s",
+                             "bytes": "B/s"}
                     params = benchmarks_results["params"]
                     parsed_benchmark = BenchmarkResult(
-                        batch_id="A", #CORRECT THIS
+                        #batch_id=str(self.result_file), #CORRECT THIS
                         stats={
                             "data": [data],
-                            "unit": "s", #CORRECT THIS
-                            "times": [data],
-                            "time_unit": benchmarks_info[name]['unit'],
+                            "unit": units[benchmarks_info[name]['unit']], #CORRECT THIS
                             "iterations": 1,
                         },
                         tags=tags,
