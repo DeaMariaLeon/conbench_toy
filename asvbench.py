@@ -57,14 +57,14 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
 
         #save benchmark names which did not work for debugging
         if no_results:
-            with open("noresults", "a") as no_f:
+            with open(".\logs\noresults", "a") as no_f:
                 no_f.write("\n")
                 no_f.write(benchmarks_results["commit_hash"])
                 no_f.write("\n")
                 no_f.write("\n".join(set(no_results)))
         
         if failing:
-            with open("failing", "a") as failing_f:
+            with open(".\logs\failing", "a") as failing_f:
                 failing_f.write("\n")
                 failing_f.write(benchmarks_results["commit_hash"])
                 failing_f.write("\n")
