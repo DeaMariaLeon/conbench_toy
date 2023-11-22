@@ -55,7 +55,8 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         
         parsed_benchmarks, no_results, failing = self._parse_results(benchmarks_results, benchmarks_info)
 
-        #save benchmark names which did not work for debugging
+        #save benchmark names which did not work
+        #TODO: change \logs subdirectory name by an env variable
         if no_results:
             with open(".\logs\noresults", "a") as no_f:
                 no_f.write("\n")
@@ -103,8 +104,10 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     tags = {}
                     tags["name"] = name
                     tags.update(param_dic)
+                    #conbench only takes B/s, s, ns, i/s as units
+                    #asv units are seconds or bytes
                     units = {"seconds": "s",
-                             "bytes": "B/s"}
+                             "bytes": "B/s"} 
                     params = benchmarks_results["params"]
                     parsed_benchmark = BenchmarkResult(
                         #batch_id=str(self.result_file), #CORRECT THIS
