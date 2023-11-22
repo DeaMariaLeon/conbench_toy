@@ -66,10 +66,11 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         
         if failing:
             with open("logs/failing", "a") as failing_f:
-                failing_f.write("\n")
-                failing_f.write(benchmarks_results["commit_hash"])
-                failing_f.write("\n")
-                failing_f.write("\n".join(set(failing))) 
+                failing_f.write("\n{")
+                failing_f.write("'"+ benchmarks_results["commit_hash"]+"':")
+                failing_f.write("\n'")
+                failing_f.write("\n".join(set(failing))+"'")
+                failing_f.write("\n}")
 
         return parsed_benchmarks
 
