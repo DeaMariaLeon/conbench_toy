@@ -20,7 +20,7 @@ def adapter_instance(file_to_read):
 benchmarks_path = Path("./asv_files")
 all_files = [str(file) for file in benchmarks_path.glob('*.json')]
 
-with open("asv_files_read", "r+") as f:
+with open("asv_processed_files", "r+") as f:
     processed_files = f.read().split('\n')
     for new_file in (set(all_files) - set(processed_files)):
         adapter_instance(new_file)
