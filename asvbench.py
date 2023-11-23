@@ -58,19 +58,21 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         #save benchmark names which did not work
         #TODO: change \logs subdirectory name by an env variable
         if no_results:
-            with open("logs/noresults", "a") as no_f:
+            file_name = "".join(["no_results/",benchmarks_results["commit_hash"]])
+            with open(file_name, "a") as no_f:
                 no_f.write("\n")
                 no_f.write(benchmarks_results["commit_hash"])
                 no_f.write("\n")
                 no_f.write("\n".join(set(no_results)))
         
         if failing:
-            with open("logs/failing", "a") as failing_f:
+            file_name = "".join(["failing/",benchmarks_results["commit_hash"]])
+            with open(file_name, "a") as failing_f:
                 failing_f.write("\n")
                 failing_f.write(benchmarks_results["commit_hash"])
                 failing_f.write("\n")
                 failing_f.write("\n".join(set(failing)))
-             
+                
 
         return parsed_benchmarks
 
@@ -120,13 +122,14 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                         tags=tags,
                         context={"benchmark_language": "Python",
                                  "env_name": benchmarks_results["env_name"],
-                                 "date": str(datetime.fromtimestamp(benchmarks_results["date"]/1e3)),
                                  "python": benchmarks_results["python"],
                                  "requirements": benchmarks_results["requirements"],
                                  },
                         github={"repository": "git@github.com:pandas-dev/pandas",
                                 "commit":benchmarks_results["commit_hash"],
                                 },
+                        info={"date": str(datetime.fromtimestamp(benchmarks_results["date"]/1e3)),
+                             },
                         machine_info={
                              "name": params["machine"],
                              "os_name": params["os"],
