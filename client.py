@@ -23,10 +23,8 @@ all_files = [str(file) for file in benchmarks_path.glob('*.json')]
 with open("asv_processed_files", "r+") as f:
     processed_files = f.read().split('\n')
     for new_file in (set(all_files) - set(processed_files)):
-        try:
-            adapter_instance(new_file)
-            f.write(new_file)
-            f.write("\n")
-        except:
-            print("The file you are trying to read is not correct")
+        adapter_instance(new_file)
+        f.write(new_file)
+        f.write("\n")
+        
         
