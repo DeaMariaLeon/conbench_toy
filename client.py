@@ -17,17 +17,14 @@ def adapter_instance(file_to_read):
     adapter.run()
     adapter.post_results()
 
-benchmarks_path = Path("./asv_files")
+#benchmarks_path = Path("./asv_files")
+benchmarks_path = Path("/tmp/pandas_asv_results")
 all_files = [str(file) for file in benchmarks_path.glob('*.json')]
 
 with open("asv_processed_files", "r+") as f:
     processed_files = f.read().split('\n')
     for new_file in (set(all_files) - set(processed_files)):
-        print(set(all_files) - set(processed_files))
-        try:
             adapter_instance(new_file)
             f.write(new_file)
             f.write("\n")
-        except:
-            print("The file you are trying to read is not correct")
         
