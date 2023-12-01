@@ -90,7 +90,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
             #Bug with this benchmark: series_methods.ToFrame.time_to_frame
             if name == "series_methods.ToFrame.time_to_frame":
                 continue
-            print(name)
+            #print(name)
             try:     
                 result_dict = dict(zip(result_columns, 
                                 benchmarks_results["results"][name]))
@@ -100,7 +100,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     ):
                     if np.isnan(data):
                             failing.append(name)
-                            print('failing ', name)
+                            #print('failing ', name)
                             continue   
                     param_dic = dict(zip(benchmarks_info[name]["param_names"],
                                      param_values))      
