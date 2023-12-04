@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import json
+import time
 
 load_dotenv(dotenv_path="./local_env.yml")
 
@@ -17,14 +18,18 @@ def adapter_instance(file_to_read):
     adapter.run()
     adapter.post_results()
 
-#benchmarks_path = Path("./asv_files")
-benchmarks_path = Path("/tmp/pandas_asv_results")
-all_files = [str(file) for file in benchmarks_path.glob('*.json')]
-
-with open("asv_processed_files", "r+") as f:
-    processed_files = f.read().split('\n')
-    for new_file in (set(all_files) - set(processed_files)):
-            adapter_instance(new_file)
-            f.write(new_file)
-            f.write("\n")
+while True:
+    benchmarks_path = Path("./asv_files")
+    #benchmarks_path = Path("/tmp/pandas_asv_results")
+    all_files = [str(file) for file in benchmarks_path.glob('*.json')]
+    
+    
+    with open("asv_processed_files", "r+") as f:
+        processed_files = f.read().split('\n')
+        for new_file in (set(all_files) - set(processed_files)):
+                adapter_instance(new_file)
+                f.write(new_file)
+                f.write("\n")
+                print(new_file)
+    time.sleep(10) #adjust this on server
         
