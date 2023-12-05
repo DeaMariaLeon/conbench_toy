@@ -33,6 +33,5 @@ while True:
                 adapter_instance(new_file)
                 f.write(new_file)
                 f.write("\n")
-                print(new_file)
     time.sleep(10) #adjust this on server
         
