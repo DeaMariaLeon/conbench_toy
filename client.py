@@ -15,7 +15,7 @@ PANDAS_ASV_RESULTS_PATH = os.getenv("PANDAS_ASV_RESULTS_PATH")
 
 def adapter_instance(file_to_read):
     adapter = AsvBenchmarkAdapter(
-    command=["echo", "Reading asv benchmarks"],
+    command=["echo", str(file_to_read)],
     result_file=Path(file_to_read),
     result_fields_override={
         "run_reason": os.getenv("CONBENCH_RUN_REASON"),
@@ -33,5 +33,5 @@ while True:
                 adapter_instance(new_file)
                 f.write(new_file)
                 f.write("\n")
-    time.sleep(10) #adjust this on server
+    time.sleep(30) #adjust this on server
         
