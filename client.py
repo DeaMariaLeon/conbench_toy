@@ -4,8 +4,14 @@ import os
 from dotenv import load_dotenv
 import json
 import time
+import socket
 
-load_dotenv(dotenv_path="./local_env.yml")
+if socket.gethostname().startswith('Deas'):
+    load_dotenv(dotenv_path="./local_env.yml")
+else:
+     load_dotenv(dotenv_path="./server_env.yml")
+
+PANDAS_ASV_RESULTS_PATH = os.getenv("PANDAS_ASV_RESULTS_PATH")
 
 def adapter_instance(file_to_read):
     adapter = AsvBenchmarkAdapter(
@@ -19,11 +25,8 @@ def adapter_instance(file_to_read):
     adapter.post_results()
 
 while True:
-    benchmarks_path = Path("./asv_files")
-    #benchmarks_path = Path("/tmp/pandas_asv_results")
+    benchmarks_path = Path(PANDAS_ASV_RESULTS_PATH)
     all_files = [str(file) for file in benchmarks_path.glob('*.json')]
-    
-    
     with open("asv_processed_files", "r+") as f:
         processed_files = f.read().split('\n')
         for new_file in (set(all_files) - set(processed_files)):
