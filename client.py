@@ -23,6 +23,10 @@ def adapter_instance(file_to_read):
     )
     adapter.run()
     adapter.post_results()
+    with open("asv_processed_files", "a") as f:
+         f.write(file_to_read)
+         f.write("\n")
+         
 
 while True:
     benchmarks_path = Path(PANDAS_ASV_RESULTS_PATH)
@@ -30,8 +34,6 @@ while True:
     with open("asv_processed_files", "r+") as f:
         processed_files = f.read().split('\n')
         for new_file in (set(all_files) - set(processed_files)):
-                adapter_instance(new_file)
-                f.write(new_file)
-                f.write("\n")
+            adapter_instance(new_file)
     time.sleep(30) #adjust this on server
         
