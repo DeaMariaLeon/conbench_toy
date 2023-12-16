@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import Any, Dict, List
 import itertools
 import numpy as np
+import os
 from datetime import datetime
+
 
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
@@ -50,7 +52,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
 
             benchmarks_results = json.load(f)
         
-        with open("benchmarks.json") as f:
+        with open("algos2_results/benchmarks.json") as f:
             benchmarks_info = json.load(f)
         
         parsed_benchmarks, no_results, failing = self._parse_results(benchmarks_results, benchmarks_info)
@@ -125,7 +127,8 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                                  "python": benchmarks_results["python"],
                                  "requirements": benchmarks_results["requirements"],
                                  },
-                        github={"repository": "git@github.com:pandas-dev/pandas",
+                        github={#"repository": "git@github.com:pandas-dev/pandas",
+                                "repository": os.environ["REPOSITORY"],
                                 "commit":benchmarks_results["commit_hash"],
                                 },
                         info={"date": str(datetime.fromtimestamp(benchmarks_results["date"]/1e3)),
