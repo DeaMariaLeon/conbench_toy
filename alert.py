@@ -11,7 +11,7 @@ from benchalerts.conbench_dataclasses import FullComparisonInfo
 load_dotenv(dotenv_path="./local_env.yml")
 
 #commit_hash = os.environ["GITHUB_SHA"]
-commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6"
+#commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6"
 #commit_hash = "007310665f8e2741ac5694f05d9412bbe6e326e8"
 
 repo = os.getenv("GITHUB_REPOSITORY")
@@ -22,7 +22,7 @@ repo = os.getenv("GITHUB_REPOSITORY")
 #    #+ "7289196759" #os.environ["GITHUB_RUN_ID"]
 #    + "7323312613"
 #)
-def alert():
+def alert(commit_hash):
 
     # Create a pipeline to update a GitHub Check
     pipeline = AlertPipeline(
