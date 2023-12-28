@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import json
 import time
 import socket
+import alert
 
 if socket.gethostname().startswith('Deas'):
     load_dotenv(dotenv_path="./local_env.yml")
@@ -22,6 +23,8 @@ def adapter_instance(file_to_read):
     },
     )
     adapter.run()
+    print(adapter.results[0].github['commit'])
+    print(adapter.results[0].github['repository'])
     adapter.post_results()
     with open("asv_processed_files", "a") as f:
          f.write(file_to_read)

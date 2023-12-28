@@ -22,31 +22,34 @@ repo = os.getenv("GITHUB_REPOSITORY")
 #    #+ "7289196759" #os.environ["GITHUB_RUN_ID"]
 #    + "7323312613"
 #)
+def alert():
 
-# Create a pipeline to update a GitHub Check
-pipeline = AlertPipeline(
-    steps=[
-        steps.GetConbenchZComparisonStep(
-            commit_hash=commit_hash,
-            #baseline_run_type=steps.BaselineRunCandidates.fork_point,
-            #baseline_run_type=steps.BaselineRunCandidates.latest_default,
-            baseline_run_type=steps.BaselineRunCandidates.parent,
-            z_score_threshold=1, #If not set it defaults to 5
-        ),
-        steps.GitHubCheckStep(
-            commit_hash=commit_hash,
-            comparison_step_name="GetConbenchZComparisonStep",
-            github_client=GitHubRepoClient(repo=repo),
-            #build_url=build_url,
-        ),
-    ],
-    error_handlers=[
-        steps.GitHubCheckErrorHandler(
-            commit_hash=commit_hash, repo=repo, #build_url=build_url
-        )
-    ],
-)
+    # Create a pipeline to update a GitHub Check
+    pipeline = AlertPipeline(
+        steps=[
+            steps.GetConbenchZComparisonStep(
+                commit_hash=commit_hash,
+                #baseline_run_type=steps.BaselineRunCandidates.fork_point,
+                #baseline_run_type=steps.BaselineRunCandidates.latest_default,
+                baseline_run_type=steps.BaselineRunCandidates.parent,
+                z_score_threshold=1, #If not set it defaults to 5
+            ),
+            steps.GitHubCheckStep(
+                commit_hash=commit_hash,
+                comparison_step_name="GetConbenchZComparisonStep",
+                github_client=GitHubRepoClient(repo=repo),
+                #build_url=build_url,
+            ),
+        ],
+        error_handlers=[
+            steps.GitHubCheckErrorHandler(
+                commit_hash=commit_hash, repo=repo, #build_url=build_url
+            )
+        ],
+    )
+    
+    # Run the pipeline
+    print(pipeline.run_pipeline())
 
-# Run the pipeline
-print(pipeline.run_pipeline())
-
+if __name__ == "__main__":
+    alert()
