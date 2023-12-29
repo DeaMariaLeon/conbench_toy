@@ -2,19 +2,11 @@ from asvbench import AsvBenchmarkAdapter
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-import json
 import time
 import socket
 import alert
 
-if socket.gethostname().startswith('Deas'):
-    load_dotenv(dotenv_path="./local_env.yml")
-else:
-     load_dotenv(dotenv_path="./server_env.yml")
-
-PANDAS_ASV_RESULTS_PATH = os.getenv("PANDAS_ASV_RESULTS_PATH")
-
-def adapter_instance(file_to_read):
+def adapter_instance(file_to_read) -> None:
     adapter = AsvBenchmarkAdapter(
     command=["echo", str(file_to_read)],
     result_file=Path(file_to_read),
@@ -23,20 +15,30 @@ def adapter_instance(file_to_read):
     },
     )
     adapter.run()
-    print(adapter.results[0].github['commit'])
     alert.alert(adapter.results[0].github['commit'])
     adapter.post_results()
     with open("asv_processed_files", "a") as f:
          f.write(file_to_read)
          f.write("\n")
          
+def main() -> None:
+   
+   if socket.gethostname().startswith('Deas'):
+      load_dotenv(dotenv_path="./local_env.yml")
+   else:
+      load_dotenv(dotenv_path="./server_env.yml")
 
-while True:
-    benchmarks_path = Path(PANDAS_ASV_RESULTS_PATH)
-    all_files = [str(file) for file in benchmarks_path.glob('*.json')]
-    with open("asv_processed_files", "r+") as f:
-        processed_files = f.read().split('\n')
-        for new_file in (set(all_files) - set(processed_files)):
-            adapter_instance(new_file)
-    time.sleep(30) #adjust this on server
+   PANDAS_ASV_RESULTS_PATH = os.getenv("PANDAS_ASV_RESULTS_PATH")
+
+   while True:
+       benchmarks_path = Path(PANDAS_ASV_RESULTS_PATH)
+       all_files = [str(file) for file in benchmarks_path.glob('*.json')]
+       with open("asv_processed_files", "r+") as f:
+           processed_files = f.read().split('\n')
+           for new_file in (set(all_files) - set(processed_files)):
+               adapter_instance(new_file)
+       time.sleep(30) #adjust this on server
+
+if __name__=="__main__":
+   main()
         

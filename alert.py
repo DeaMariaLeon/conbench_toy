@@ -7,6 +7,7 @@ from benchalerts import AlertPipeline, Alerter
 from benchalerts.integrations.github import GitHubRepoClient
 import asvbench
 from benchalerts.conbench_dataclasses import FullComparisonInfo
+import pandas as pd
 
 load_dotenv(dotenv_path="./local_env.yml")
 
@@ -34,12 +35,12 @@ def alert(commit_hash):
                 baseline_run_type=steps.BaselineRunCandidates.parent,
                 z_score_threshold=1, #If not set it defaults to 5
             ),
-            steps.GitHubCheckStep(
-                commit_hash=commit_hash,
-                comparison_step_name="GetConbenchZComparisonStep",
-                github_client=GitHubRepoClient(repo=repo),
-                #build_url=build_url,
-            ),
+            #steps.GitHubCheckStep(
+            #    commit_hash=commit_hash,
+            #    comparison_step_name="GetConbenchZComparisonStep",
+            #    github_client=GitHubRepoClient(repo=repo),
+            #    #build_url=build_url,
+            #),
         ],
         error_handlers=[
             steps.GitHubCheckErrorHandler(
@@ -49,7 +50,12 @@ def alert(commit_hash):
     )
     
     # Run the pipeline
-    print(pipeline.run_pipeline())
+    #print(pipeline.run_pipeline())
+    data = pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
+    df = pd.DataFrame.from_dict(data=data)
+    print(df.head())
+    
 
 if __name__ == "__main__":
-    alert()
+    commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6"
+    alert(commit_hash)
