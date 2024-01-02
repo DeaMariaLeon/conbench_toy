@@ -15,7 +15,7 @@ def adapter_instance(file_to_read) -> None:
     },
     )
     adapter.run()
-    alert.alert(adapter.results[0].github['commit'])
+    #alert.alert(adapter.results[0].github['commit'])
     adapter.post_results()
     with open("asv_processed_files", "a") as f:
          f.write(file_to_read)
