@@ -6,6 +6,8 @@ import time
 import socket
 import alert
 
+PANDAS_ASV_RESULTS_PATH = os.getenv("PANDAS_ASV_RESULTS_PATH")
+
 def adapter_instance(file_to_read) -> None:
     adapter = AsvBenchmarkAdapter(
     command=["echo", str(file_to_read)],
@@ -28,7 +30,7 @@ def main() -> None:
    else:
       load_dotenv(dotenv_path="./server_env.yml")
 
-   PANDAS_ASV_RESULTS_PATH = os.getenv("PANDAS_ASV_RESULTS_PATH")
+   
 
    while True:
        benchmarks_path = Path(PANDAS_ASV_RESULTS_PATH)

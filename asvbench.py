@@ -17,7 +17,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         command: List[str],
         result_file: Path,
         result_fields_override: Dict[str, Any] = None,
-        result_fields_append: Dict[str, Any] = None,        
+        result_fields_append: Dict[str, Any] = None,       
     ) -> None:
         """
         Parameters
@@ -47,12 +47,12 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
     def _transform_results(self) -> List[BenchmarkResult]:
         """Transform asv results into a list of BenchmarkResults instances"""
         parsed_benchmarks = []
-        
-        with open(self.result_file, "r") as f:
 
+        with open(self.result_file, "r") as f:           
             benchmarks_results = json.load(f)
-        
-        with open("algos2_results/benchmarks.json") as f:
+
+        benchmarks_file = self.result_file.parent.name + "/benchmarks.json"
+        with open(benchmarks_file) as f:
             benchmarks_info = json.load(f)
         
         parsed_benchmarks, no_results, failing = self._parse_results(benchmarks_results, benchmarks_info)
@@ -112,7 +112,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     #conbench only takes B/s, s, ns, i/s as units
                     #asv units are seconds or bytes
                     units = {"seconds": "s",
-                             "bytes": "B/s"} 
+                             "bytes": "B"} 
                     params = benchmarks_results["params"]
                     parsed_benchmark = BenchmarkResult(
                         #batch_id=str(self.result_file), #CORRECT THIS
