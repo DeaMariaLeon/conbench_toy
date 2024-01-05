@@ -16,8 +16,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         self,
         command: List[str],
         result_file: Path,
+        BENCHMARKS_FILE_PATH: str,
         result_fields_override: Dict[str, Any] = None,
-        result_fields_append: Dict[str, Any] = None,       
+        result_fields_append: Dict[str, Any] = None,
     ) -> None:
         """
         Parameters
@@ -38,6 +39,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
             recursively.
         """
         self.result_file = result_file
+        self.BENCHMARKS_FILE_PATH=BENCHMARKS_FILE_PATH
         super().__init__(
             command=command,
             result_fields_override=result_fields_override,
@@ -51,7 +53,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         with open(self.result_file, "r") as f:           
             benchmarks_results = json.load(f)
 
-        benchmarks_file = self.result_file.parent.name + "/benchmarks.json"
+        benchmarks_file = self.BENCHMARKS_FILE_PATH + "benchmarks.json"
         with open(benchmarks_file) as f:
             benchmarks_info = json.load(f)
         
@@ -109,8 +111,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     tags = {}
                     tags["name"] = name
                     tags.update(param_dic)
-                    #conbench only takes B/s, s, ns, i/s as units
-                    #asv units are seconds or bytes
+                    #asv units are seconds or bytes, conbench uses "s" or "B"
                     units = {"seconds": "s",
                              "bytes": "B"} 
                     params = benchmarks_results["params"]
@@ -118,7 +119,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                         #batch_id=str(self.result_file), #CORRECT THIS
                         stats={
                             "data": [data],
-                            "unit": units[benchmarks_info[name]['unit']], #CORRECT THIS
+                            "unit": units[benchmarks_info[name]['unit']],
                             "iterations": 1,
                         },
                         tags=tags,
@@ -127,8 +128,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                                  "python": benchmarks_results["python"],
                                  "requirements": benchmarks_results["requirements"],
                                  },
-                        github={#"repository": "git@github.com:pandas-dev/pandas",
-                                "repository": os.environ["REPOSITORY"],
+                        github={"repository": os.environ["REPOSITORY"],
                                 "commit":benchmarks_results["commit_hash"],
                                 },
                         info={"date": str(datetime.fromtimestamp(benchmarks_results["date"]/1e3)),

@@ -6,7 +6,13 @@ import time
 import socket
 import alert
 
+if socket.gethostname().startswith('Deas'):
+      load_dotenv(dotenv_path="./local_env.yml")
+else:
+      load_dotenv(dotenv_path="./server_env.yml")
+
 PANDAS_ASV_RESULTS_PATH = os.getenv("PANDAS_ASV_RESULTS_PATH")
+BENCHMARKS_FILE_PATH = os.getenv("BENCHMARKS_FILE_PATH")
 
 def adapter_instance(file_to_read) -> None:
     adapter = AsvBenchmarkAdapter(
@@ -15,6 +21,7 @@ def adapter_instance(file_to_read) -> None:
     result_fields_override={
         "run_reason": os.getenv("CONBENCH_RUN_REASON"),
     },
+    BENCHMARKS_FILE_PATH=BENCHMARKS_FILE_PATH,
     )
     adapter.run()
     #alert.alert(adapter.results[0].github['commit'])
@@ -25,13 +32,6 @@ def adapter_instance(file_to_read) -> None:
          
 def main() -> None:
    
-   if socket.gethostname().startswith('Deas'):
-      load_dotenv(dotenv_path="./local_env.yml")
-   else:
-      load_dotenv(dotenv_path="./server_env.yml")
-
-   
-
    while True:
        benchmarks_path = Path(PANDAS_ASV_RESULTS_PATH)
        all_files = [str(file) for file in benchmarks_path.glob('*.json')]
