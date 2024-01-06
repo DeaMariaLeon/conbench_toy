@@ -60,21 +60,21 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         parsed_benchmarks, no_results, failing = self._parse_results(benchmarks_results, benchmarks_info)
 
         #save benchmark names which did not work, by commit
-        if no_results:
-            file_name = "".join(["no_results/",benchmarks_results["commit_hash"]])
-            with open(file_name, "a") as no_f:
-                no_f.write("\n")
-                no_f.write(benchmarks_results["commit_hash"])
-                no_f.write("\n")
-                no_f.write("\n".join(set(no_results)))
+        #if no_results:
+        #    file_name = "".join(["no_results/",benchmarks_results["commit_hash"]])
+        #    with open(file_name, "a") as no_f:
+        #        no_f.write("\n")
+        #        no_f.write(benchmarks_results["commit_hash"])
+        #        no_f.write("\n")
+        #        no_f.write("\n".join(set(no_results)))
         #save failing case combination (asv calls this "parameter")
-        if failing:
-            file_name = "".join(["failing/",benchmarks_results["commit_hash"]])
-            with open(file_name, "a") as failing_f:
-                failing_f.write("\n")
-                failing_f.write(benchmarks_results["commit_hash"])
-                failing_f.write("\n")
-                failing_f.write("\n".join(set(failing)))
+        #if failing:
+        #    file_name = "".join(["failing/",benchmarks_results["commit_hash"]])
+        #    with open(file_name, "a") as failing_f:
+        #        failing_f.write("\n")
+        #        failing_f.write(benchmarks_results["commit_hash"])
+        #        failing_f.write("\n")
+        #        failing_f.write("\n".join(set(failing)))
                 
 
         return parsed_benchmarks
