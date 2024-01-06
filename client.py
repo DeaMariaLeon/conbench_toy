@@ -37,8 +37,8 @@ def main() -> None:
        all_files = [str(file) for file in benchmarks_path.glob('*.json')]
        with open("asv_processed_files", "r+") as f:
            processed_files = f.read().split('\n')
-           for new_file in (set(all_files) - set(processed_files)):
-               adapter_instance(new_file)
+       for new_file in (set(all_files) - set(processed_files)):
+           adapter_instance(new_file)
        time.sleep(30) #adjust this on server
 
 if __name__=="__main__":
