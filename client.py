@@ -21,7 +21,7 @@ def adapter_instance(file_to_read) -> None:
     result_fields_override={
         "run_reason": os.getenv("CONBENCH_RUN_REASON"),
     },
-    BENCHMARKS_FILE_PATH=BENCHMARKS_FILE_PATH,
+    benchmarks_file_path=BENCHMARKS_FILE_PATH,
     )
     adapter.run()
     #alert.alert(adapter.results[0].github['commit'])

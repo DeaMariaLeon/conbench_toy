@@ -16,7 +16,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         self,
         command: List[str],
         result_file: Path,
-        BENCHMARKS_FILE_PATH: str,
+        benchmarks_file_path: str,
         result_fields_override: Dict[str, Any] = None,
         result_fields_append: Dict[str, Any] = None,
     ) -> None:
@@ -39,7 +39,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
             recursively.
         """
         self.result_file = result_file
-        self.BENCHMARKS_FILE_PATH=BENCHMARKS_FILE_PATH
+        self.benchmarks_file_path=benchmarks_file_path
         super().__init__(
             command=command,
             result_fields_override=result_fields_override,
@@ -53,14 +53,13 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         with open(self.result_file, "r") as f:           
             benchmarks_results = json.load(f)
 
-        benchmarks_file = self.BENCHMARKS_FILE_PATH + "benchmarks.json"
+        benchmarks_file = self.benchmarks_file_path + "benchmarks.json"
         with open(benchmarks_file) as f:
             benchmarks_info = json.load(f)
         
         parsed_benchmarks, no_results, failing = self._parse_results(benchmarks_results, benchmarks_info)
 
-        #save benchmark names which did not work
-        #TODO: change \logs subdirectory name by an env variable
+        #save benchmark names which did not work, by commit
         if no_results:
             file_name = "".join(["no_results/",benchmarks_results["commit_hash"]])
             with open(file_name, "a") as no_f:
@@ -68,7 +67,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                 no_f.write(benchmarks_results["commit_hash"])
                 no_f.write("\n")
                 no_f.write("\n".join(set(no_results)))
-        
+        #save failing case combination (asv calls this "parameter")
         if failing:
             file_name = "".join(["failing/",benchmarks_results["commit_hash"]])
             with open(file_name, "a") as failing_f:
@@ -89,7 +88,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         result_columns = benchmarks_results["result_columns"]
         parsed_benchmarks = []
         no_results = []
-        failing = []     
+        failing = []      
         for name in benchmarks_results["results"]:
             #Bug with this benchmark: series_methods.ToFrame.time_to_frame
             if name == "series_methods.ToFrame.time_to_frame":
@@ -118,9 +117,16 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     parsed_benchmark = BenchmarkResult(
                         #batch_id=str(self.result_file), #CORRECT THIS
                         stats={
-                            "data": [data],
+                            #asv returns one value wich is the average of the iterations
+                            #but it can be changed so it returns the value of each iteration
+                            #if asv returns the value of each iteration, the variable "data"
+                            #will be a list, so this needs to be addressed below
+                            "data": [data],  
                             "unit": units[benchmarks_info[name]['unit']],
-                            "iterations": 1,
+                            #iterations below is for conbench, 1 if we only provide a value
+                            #if we run asv to return the value of each iteration (in data above)
+                            #iterations should match the number of values
+                            "iterations": 1, 
                         },
                         tags=tags,
                         context={"benchmark_language": "Python",
