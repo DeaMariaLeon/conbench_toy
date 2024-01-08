@@ -36,8 +36,7 @@ def main() -> None:
        with open("asv_processed_files", "r+") as f:
            processed_files = f.read().split('\n')
        for new_file in (set(all_files) - set(processed_files)):
-    
-           #adapter_instance(new_file)
+           adapter_instance(new_file)
            with open("asv_processed_files", "a") as f:
                f.write(new_file)
                f.write("\n") 
