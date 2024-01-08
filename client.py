@@ -26,9 +26,7 @@ def adapter_instance(file_to_read) -> None:
     adapter.run()
     #alert.alert(adapter.results[0].github['commit'])
     adapter.post_results()
-    with open("asv_processed_files", "a") as f:
-         f.write(file_to_read)
-         f.write("\n")
+    
          
 def main() -> None:
    
@@ -38,7 +36,11 @@ def main() -> None:
        with open("asv_processed_files", "r+") as f:
            processed_files = f.read().split('\n')
        for new_file in (set(all_files) - set(processed_files)):
-           adapter_instance(new_file)
+    
+           #adapter_instance(new_file)
+           with open("asv_processed_files", "a") as f:
+               f.write(new_file)
+               f.write("\n") 
        time.sleep(30) #adjust this on server
 
 if __name__=="__main__":

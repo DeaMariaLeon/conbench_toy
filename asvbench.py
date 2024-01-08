@@ -57,26 +57,8 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         with open(benchmarks_file) as f:
             benchmarks_info = json.load(f)
         
-        parsed_benchmarks, no_results, failing = self._parse_results(benchmarks_results, benchmarks_info)
-
-        #save benchmark names which did not work, by commit
-        #if no_results:
-        #    file_name = "".join(["no_results/",benchmarks_results["commit_hash"]])
-        #    with open(file_name, "a") as no_f:
-        #        no_f.write("\n")
-        #        no_f.write(benchmarks_results["commit_hash"])
-        #        no_f.write("\n")
-        #        no_f.write("\n".join(set(no_results)))
-        #save failing case combination (asv calls this "parameter")
-        #if failing:
-        #    file_name = "".join(["failing/",benchmarks_results["commit_hash"]])
-        #    with open(file_name, "a") as failing_f:
-        #        failing_f.write("\n")
-        #        failing_f.write(benchmarks_results["commit_hash"])
-        #        failing_f.write("\n")
-        #        failing_f.write("\n".join(set(failing)))
-                
-
+        parsed_benchmarks = self._parse_results(benchmarks_results, benchmarks_info)
+ 
         return parsed_benchmarks
 
     def _parse_results(self, benchmarks_results, benchmarks_info):
@@ -85,10 +67,12 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         # "stats_q_25", "stats_q_75", "stats_number", "stats_repeat", "samples", "profile"] 
         # In this first version of the adapter we are using only the "result" column. 
         # TODO: use the "samples" column instead.
-        result_columns = benchmarks_results["result_columns"]
+        try:
+           result_columns = benchmarks_results["result_columns"]
+        except:
+           raise Exception("Incorrect file format") 
         parsed_benchmarks = []
-        no_results = []
-        failing = []      
+          
         for name in benchmarks_results["results"]:
             #Bug with this benchmark: series_methods.ToFrame.time_to_frame
             if name == "series_methods.ToFrame.time_to_frame":
@@ -102,7 +86,6 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     result_dict['result']
                     ):
                     if np.isnan(data):
-                            failing.append(name)
                             #print('failing ', name)
                             continue   
                     param_dic = dict(zip(benchmarks_info[name]["param_names"],
@@ -158,9 +141,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                              "gpu_product_names": [],      
                                }
                     )
-                    parsed_benchmarks.append(parsed_benchmark)         
+                    parsed_benchmarks.append(parsed_benchmark)
             except:
-                    no_results.append(name)
+                continue
         
-        return parsed_benchmarks, no_results, failing
+        return parsed_benchmarks
 
