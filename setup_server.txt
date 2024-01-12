@@ -70,17 +70,12 @@ From conbench repository, and then edit Makefile, docker-compose.yml and conbenc
 Edit Makefile in order to use port 5000 on server: USE BRANCH “server” 
 
 cd conbench/conbench (where the conbench clone is):
-vim Makefile
-i (insert)
 
 Go to line 13 an change 
 export DCOMP_CONBENCH_HOST_PORT=127.0.0.1:5000
 
 to:
 export DCOMP_CONBENCH_HOST_PORT=0.0.0.0:5000
-
-Click escape
-:wq
 
 Edit docker-compose.yml
 line 15 - APPLICATION_NAME: "pandas-conbench-PoC"
