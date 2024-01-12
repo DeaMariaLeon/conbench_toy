@@ -121,7 +121,7 @@ touch server_env.yml
 
 Edit server_env.yml and use these to sign up to conbench server:
 
-CONBENCH_URL=http://0.0.0.0:5000 (or 5050)
+CONBENCH_URL=http://0.0.0.0:5000
 CONBENCH_EMAIL=“set-your-email”
 CONBENCH_PASSWORD=“set-your-password”   -THIS IS MINE, when I sign up
 CONBENCH_RUN_REASON=commit
