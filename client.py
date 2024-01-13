@@ -24,7 +24,7 @@ def adapter_instance(file_to_read) -> None:
     benchmarks_file_path=BENCHMARKS_FILE_PATH,
     )
     adapter.run()
-    #alert.alert(adapter.results[0].github['commit'])
+    alert.alert(adapter.results[0].github['commit'])
     adapter.post_results()
     
          
