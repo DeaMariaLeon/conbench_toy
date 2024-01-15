@@ -5,6 +5,7 @@ import socket
 import benchalerts.pipeline_steps as steps
 from benchalerts.integrations.github import CheckStatus
 import benchmark_email
+import re
 #from benchalerts.pipeline_steps.slack import (
 #    SlackErrorHandler,
 #    ©,
@@ -51,14 +52,17 @@ def alert(commit_hash):
     
     # Run the pipeline
     #print(pipeline.run_pipeline())
-    data = pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
+    #data = pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
 
     full_comparison_info = pipeline.run_pipeline()['GetConbenchZComparisonStep']
     alerter = Alerter()
     if alerter.github_check_status(full_comparison_info) == CheckStatus.FAILURE:
-        message = alerter.github_check_summary(full_comparison_info, "")
-        subject = """Subject: Benchmarks Alert \n\n"""
-        benchmark_email.email(subject+message)
+        
+        message = """Subject: Benchmarks Alert \n\n """ \
+                  + alerter.github_check_summary(full_comparison_info, "")
+        cleaned_message = re.sub(r'\(http.*', '', message)
+        
+        benchmark_email.email(cleaned_message)
 
 if __name__ == "__main__":
     commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6"
