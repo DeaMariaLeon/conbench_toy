@@ -65,5 +65,6 @@ def alert(commit_hash):
         benchmark_email.email(cleaned_message)
 
 if __name__ == "__main__":
-    commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6"
+    commit_hash = 'acf5d7d84187b5ba53e54b2a5d91a34725814bf9' #on old server
+    #commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6"
     alert(commit_hash)
