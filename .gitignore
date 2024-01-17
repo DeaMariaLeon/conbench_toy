@@ -10,4 +10,5 @@ failing/
 asv_files_ALL/
 algos2_results/
 local_env.yml
+server_env.yml
 benchmarks.json
