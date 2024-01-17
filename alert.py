@@ -31,12 +31,12 @@ def alert(commit_hash):
                 baseline_run_type=steps.BaselineRunCandidates.parent,
                 z_score_threshold=6, #If not set it defaults to 5
             ),
-            steps.GitHubCheckStep(
-                commit_hash=commit_hash,
-                comparison_step_name="GetConbenchZComparisonStep",
-                github_client=GitHubRepoClient(repo=repo),
-                #build_url=build_url,
-            ),
+            #steps.GitHubCheckStep(
+            #    commit_hash=commit_hash,
+            #    comparison_step_name="GetConbenchZComparisonStep",
+            #    github_client=GitHubRepoClient(repo=repo),
+            #    #build_url=build_url,
+            #),
             #steps.SlackMessageAboutBadCheckStep(
             #   channel_id="conbench-poc",
             #),

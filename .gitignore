@@ -11,4 +11,4 @@ asv_files_ALL/
 algos2_results/
 local_env.yml
 benchmarks.json
-asv_processed_files.txt
+asv_processed_files
