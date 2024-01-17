@@ -16,7 +16,6 @@ def email(message):
     receiver_email = ["deamarialeon@gmail.com"]
     gmail_password=os.getenv("GMAIL_PASSWORD")
     
-    # Send email here
     # Create a secure SSL context
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
@@ -26,7 +25,7 @@ def email(message):
     
 if __name__=="__main__":
     message = """\
-        Subject: Hi there
+        Subject: Hello
 
-        This message is sent from Python."""
+        Message sent from conbenchalert."""
     email(message)
