@@ -15,7 +15,10 @@ import asvbench
 from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
 
-load_dotenv(dotenv_path="./local_env.yml")
+if socket.gethostname().startswith('Deas'):
+      load_dotenv(dotenv_path="./local_env.yml")
+else:
+      load_dotenv(dotenv_path="./server_env.yml")
 
 repo = os.getenv("GITHUB_REPOSITORY")
 
