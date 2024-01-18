@@ -45,11 +45,11 @@ def alert(commit_hash):
             #),
 
         ],
-        error_handlers=[
-            steps.GitHubCheckErrorHandler(
-                commit_hash=commit_hash, repo=repo, #build_url=build_url
-            )
-        ],
+        #error_handlers=[
+        #    steps.GitHubCheckErrorHandler(
+        #        commit_hash=commit_hash, repo=repo, #build_url=build_url
+        #    )
+        #],
     )
     
     # Run the pipeline
