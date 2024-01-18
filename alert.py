@@ -29,7 +29,7 @@ def alert(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                z_score_threshold=6, #If not set it defaults to 5
+                z_score_threshold=1, #If not set it defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
@@ -60,11 +60,12 @@ def alert(commit_hash):
                   + alerter.github_check_summary(full_comparison_info, "")
         #TODO add links to message
         #github_check_summary() returns links to comparison: very slow
-        cleaned_message = re.sub(r'\(http.*', '', message)  
-        
-        benchmark_email.email(cleaned_message)
+        #cleaned_message = re.sub(r'\(http.*', '', message)  
+        #send message or cleaned_message
+        benchmark_email.email(message)
 
 if __name__ == "__main__":
     #commit_hash = 'acf5d7d84187b5ba53e54b2a5d91a34725814bf9' #old server
-    commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6" #local
+    commit_hash = 'fce520d45a304ee2659bb4156acf484cee5aea07' #new server
+    #commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6" #local
     alert(commit_hash)
