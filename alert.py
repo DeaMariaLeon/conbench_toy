@@ -72,6 +72,6 @@ def alert(commit_hash):
 
 if __name__ == "__main__":
     #commit_hash = 'acf5d7d84187b5ba53e54b2a5d91a34725814bf9' #old server
-    #commit_hash = 'fce520d45a304ee2659bb4156acf484cee5aea07' #new server
-    commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6" #local
+    commit_hash = 'fce520d45a304ee2659bb4156acf484cee5aea07' #new server
+    #commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6" #local
     alert(commit_hash)
