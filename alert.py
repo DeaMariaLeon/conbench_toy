@@ -1,11 +1,10 @@
 import os
-import sys
-from dotenv import load_dotenv
-import socket
+from utilities import Environment, alerts_sent_file, check_new_files
 import benchalerts.pipeline_steps as steps
 from benchalerts.integrations.github import CheckStatus
 import benchmark_email
 import re
+import json
 #from benchalerts.pipeline_steps.slack import (
 #    SlackErrorHandler,
 #)
@@ -15,12 +14,11 @@ import asvbench
 from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
 
-if socket.gethostname().startswith('Deas'):
-      load_dotenv(dotenv_path="./local_env.yml")
-else:
-      load_dotenv(dotenv_path="./server_env.yml")
+env = Environment()
+PANDAS_ASV_RESULTS_PATH = env.PANDAS_ASV_RESULTS_PATH
+BENCHMARKS_FILE_PATH = env.BENCHMARKS_FILE_PATH
 
-repo = os.getenv("GITHUB_REPOSITORY")
+repo = env.GITHUB_REPOSITORY
 
 def alert(commit_hash):
 
@@ -74,4 +72,12 @@ if __name__ == "__main__":
     #commit_hash = 'acf5d7d84187b5ba53e54b2a5d91a34725814bf9' #old server
     commit_hash = 'fce520d45a304ee2659bb4156acf484cee5aea07' #new server
     #commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6" #local
-    alert(commit_hash)
+
+    _ , processed_files = check_new_files(env)
+    
+    for new_file in (set(processed_files) - set(alerts_sent_file(env))):   
+        with open(new_file, "r") as f:           
+            benchmarks_results = json.load(f)
+        alert(benchmarks_results['commit_hash'])
+        print(new_file) #grabar
+#alert(commit_hash)
