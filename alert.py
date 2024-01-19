@@ -1,5 +1,5 @@
 import os
-from utilities import Environment, alerts_sent_file, check_new_files
+from utilities import Environment, alerts_done_file, check_new_files
 import benchalerts.pipeline_steps as steps
 from benchalerts.integrations.github import CheckStatus
 import benchmark_email
@@ -20,7 +20,7 @@ BENCHMARKS_FILE_PATH = env.BENCHMARKS_FILE_PATH
 
 repo = env.GITHUB_REPOSITORY
 
-def alert(commit_hash):
+def alert_instance(commit_hash):
 
     # Create a pipeline to update a GitHub Check
     pipeline = AlertPipeline(
@@ -30,7 +30,7 @@ def alert(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                #z_score_threshold=5.1, #If not set it defaults to 5
+                z_score_threshold=1.0, #If not set it defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
@@ -42,13 +42,13 @@ def alert(commit_hash):
             #   channel_id="conbench-poc",
             #),
 
-        ],
+            ],
         #error_handlers=[
         #    steps.GitHubCheckErrorHandler(
         #        commit_hash=commit_hash, repo=repo, #build_url=build_url
         #    )
         #],
-    )
+        )
     
     # Run the pipeline
     # data = pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
@@ -68,16 +68,23 @@ def alert(commit_hash):
         #send message or cleaned_message
         benchmark_email.email(cleaned_message)
 
-if __name__ == "__main__":
-    #commit_hash = 'acf5d7d84187b5ba53e54b2a5d91a34725814bf9' #old server
-    commit_hash = 'fce520d45a304ee2659bb4156acf484cee5aea07' #new server
-    #commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6" #local
+def alert() -> None:
 
+    #while True:
     _ , processed_files = check_new_files(env)
-    
-    for new_file in (set(processed_files) - set(alerts_sent_file(env))):   
+    for new_file in (set(processed_files) - set(alerts_done_file(env))):   
         with open(new_file, "r") as f:           
             benchmarks_results = json.load(f)
-        alert(benchmarks_results['commit_hash'])
-        print(new_file) #grabar
-#alert(commit_hash)
+        alert_instance(benchmarks_results['commit_hash'])
+        
+        with open("alert_processed_files", "a") as f:
+            f.write(new_file)
+            f.write("\n")
+        
+
+if __name__ == "__main__":
+    #commit_hash = 'acf5d7d84187b5ba53e54b2a5d91a34725814bf9' #old server
+    #commit_hash = 'fce520d45a304ee2659bb4156acf484cee5aea07' #new server
+    #commit_hash = "c8a9c2fd3bcf23a21acfa6f4cffbc4c9360b9ea6" #local
+
+    alert()

@@ -12,3 +12,5 @@ algos2_results/
 local_env.yml
 server_env.yml
 benchmarks.json
+asv_processed_files
+alert_processed_files

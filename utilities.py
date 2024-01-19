@@ -26,7 +26,7 @@ def check_new_files(env):
         
     return all_files, processed_files
 
-def alerts_sent_file(env):
+def alerts_done_file(env):
 
     _ , processed_files = check_new_files(env)
     with open("alert_processed_files", "r+") as f:
