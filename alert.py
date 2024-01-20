@@ -49,10 +49,11 @@ def alert_instance(commit_hash):
         #    )
         #],
         )
+    return pipeline
     
     # Run the pipeline
     # data = pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
-
+def report(pipeline):
     full_comparison_info = pipeline.run_pipeline()['GetConbenchZComparisonStep']
     alerter = Alerter()
     if alerter.github_check_status(full_comparison_info) == CheckStatus.FAILURE:
@@ -60,11 +61,9 @@ def alert_instance(commit_hash):
         message = """Subject: Benchmarks Alert \n\n """ \
                   + alerter.github_check_summary(full_comparison_info, "")
         #TODO add links to message
-        #github_check_summary() returns links to comparison: very slow
-        #cleaned_message = re.sub(r'\(http.*', '', message)
         #cleaned_message = re.sub(r'0\.0\.0\.0', '127.0.0.1', message) #local
-        cleaned_message = re.sub(r'0\.0\.0\.0', '57.128.112.95', message) #new server
-       
+        correctserver = re.sub(r'0\.0\.0\.0', '57.128.112.95', message) #new server
+        cleaned_message = re.sub(r'- Commit Run.+\)|#| All benchmark runs analyzed:', '', correctserver)
         #send message or cleaned_message
         benchmark_email.email(cleaned_message)
 
@@ -75,7 +74,8 @@ def alert() -> None:
     for new_file in (set(processed_files) - set(alerts_done_file(env))):   
         with open(new_file, "r") as f:           
             benchmarks_results = json.load(f)
-        alert_instance(benchmarks_results['commit_hash'])
+        pipeline = alert_instance(benchmarks_results['commit_hash'])
+        report(pipeline)
         
         with open("alert_processed_files", "a") as f:
             f.write(new_file)
