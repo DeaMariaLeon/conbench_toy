@@ -77,7 +77,7 @@ def alert() -> None:
         pipeline = alert_instance(benchmarks_results['commit_hash'])
         report(pipeline)
         
-        with open("alert_processed_files", "a") as f:
+        with open(env.ASV_PROCESSED_FILES, "a") as f:
             f.write(new_file)
             f.write("\n")
         

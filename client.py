@@ -26,7 +26,7 @@ def post_data() -> None:
        all_files, processed_files = check_new_files(env)
        for new_file in (set(all_files) - set(processed_files)):
            adapter_instance(new_file)
-           with open("asv_processed_files", "a") as f:
+           with open(env.ASV_PROCESSED_FILES, "a") as f:
                f.write(new_file)
                f.write("\n") 
        time.sleep(30) #adjust this on server

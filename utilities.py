@@ -16,6 +16,7 @@ class Environment:
         self.BENCHMARKS_FILE_PATH = os.getenv("BENCHMARKS_FILE_PATH")
         self.GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
         self.CONBENCH_RUN_REASON = os.getenv("CONBENCH_RUN_REASON")
+        self.ASV_PROCESSED_FILES = os.getenv("ASV_PROCESSED_FILES")
     
 def check_new_files(env):
     
