@@ -15,8 +15,6 @@ from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
 
 env = Environment()
-#PANDAS_ASV_RESULTS_PATH = env.PANDAS_ASV_RESULTS_PATH
-#BENCHMARKS_FILE_PATH = env.BENCHMARKS_FILE_PATH
 
 repo = env.GITHUB_REPOSITORY
 
@@ -30,7 +28,7 @@ def alert_instance(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                z_score_threshold=1.0, #If not set it defaults to 5
+                z_score_threshold=5.5, #If not set it defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
