@@ -108,8 +108,8 @@ Clone my repo conbench_toy
 
 git clone https://github.com/DeaMariaLeon/conbench.git
 
-ADD machine.json with its path, to this file:
-asv_processed_files 
+ADD machine.json and benchmarks.json with its path, to this file:
+asv_processed_files_server
 
 Provide environment variables:
 touch server_env.yml

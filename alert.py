@@ -15,8 +15,8 @@ from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
 
 env = Environment()
-PANDAS_ASV_RESULTS_PATH = env.PANDAS_ASV_RESULTS_PATH
-BENCHMARKS_FILE_PATH = env.BENCHMARKS_FILE_PATH
+#PANDAS_ASV_RESULTS_PATH = env.PANDAS_ASV_RESULTS_PATH
+#BENCHMARKS_FILE_PATH = env.BENCHMARKS_FILE_PATH
 
 repo = env.GITHUB_REPOSITORY
 
@@ -77,7 +77,7 @@ def alert() -> None:
         pipeline = alert_instance(benchmarks_results['commit_hash'])
         report(pipeline)
         
-        with open(env.ASV_PROCESSED_FILES, "a") as f:
+        with open(env.ALERT_PROCESSED_FILES, "a") as f:
             f.write(new_file)
             f.write("\n")
         
