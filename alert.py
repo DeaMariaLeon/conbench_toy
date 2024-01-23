@@ -28,7 +28,7 @@ def alert_instance(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                z_score_threshold=5.5, #If not set it defaults to 5
+                z_score_threshold=5.5, #If not set, defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
@@ -49,8 +49,8 @@ def alert_instance(commit_hash):
         )
     return pipeline
     
-    # Run the pipeline
-    # data = pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
+    # To see the whole report, look at:
+    # pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
 def report(pipeline):
     full_comparison_info = pipeline.run_pipeline()['GetConbenchZComparisonStep']
     alerter = Alerter()

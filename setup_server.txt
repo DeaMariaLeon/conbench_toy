@@ -133,7 +133,7 @@ Use nohup so it keeps running:
 
 nohup command >/dev/null 2>&1 & # runs in background, still doesn't create nohup.
 
-nohup make run-app 2>&1 & _ this is no hungup
+nohup make run-app 2>&1 &  this is no hungup
 
 You can see nohup.out to see the logs - look for 200, when this happens the conbench server should be running.
 
@@ -150,4 +150,10 @@ Run client.py with nohup:
 
 nohup python3 client.py 2>&1 & 
 
-The last file should send all the asv results files to conbench server. 
+The last file should send all the asv results files to conbench server.
+
+To run the alerts:
+nohup python3 alerts.py
+
+Make sure you have two files: alert_processed_files_server and asv_processed_files_server.
+The web app, client.py and alerts.py run separately. 
