@@ -29,7 +29,7 @@ def alert_instance(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                z_score_threshold=6.5, #If not set, defaults to 5
+                z_score_threshold=8.5, #If not set, defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
