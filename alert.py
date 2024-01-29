@@ -13,6 +13,7 @@ from benchalerts.integrations.github import GitHubRepoClient
 import asvbench
 from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
+import time
 
 env = Environment()
 
@@ -28,7 +29,7 @@ def alert_instance(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                z_score_threshold=5.5, #If not set, defaults to 5
+                z_score_threshold=6.5, #If not set, defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
@@ -67,19 +68,20 @@ def report(pipeline):
 
 def alert() -> None:
 
-    #while True:
-    with open(env.ASV_PROCESSED_FILES, "r+") as f:
-        processed_files = f.read().split('\n')
-   
-    for new_file in (set(processed_files) - set(alerts_done_file(env))):   
-        with open(new_file, "r") as f:           
-            benchmarks_results = json.load(f)
-        pipeline = alert_instance(benchmarks_results['commit_hash'])
-        report(pipeline)
-        
-        with open(env.ALERT_PROCESSED_FILES, "a") as f:
-            f.write(new_file)
-            f.write("\n")
+    while True:
+        with open(env.ASV_PROCESSED_FILES, "r+") as f:
+            processed_files = f.read().split('\n')
+       
+        for new_file in (set(processed_files) - set(alerts_done_file(env))):   
+            with open(new_file, "r") as f:           
+                benchmarks_results = json.load(f)
+            pipeline = alert_instance(benchmarks_results['commit_hash'])
+            report(pipeline)
+            
+            with open(env.ALERT_PROCESSED_FILES, "a") as f:
+                f.write(new_file)
+                f.write("\n")
+        time.sleep(40)
         
 
 if __name__ == "__main__":

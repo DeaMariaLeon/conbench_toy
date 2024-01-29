@@ -13,7 +13,7 @@ def email(message):
     
     port = 465  # For SSL
     sender_email = "conbenchalert@gmail.com"
-    receiver_email = ["deamarialeon@gmail.com"]
+    receiver_email = ["conbenchalert@gmail.com"]
     gmail_password=os.getenv("GMAIL_PASSWORD")
     
     # Create a secure SSL context
