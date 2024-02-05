@@ -14,6 +14,7 @@ import asvbench
 from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
 import time
+import numpy as np
 
 env = Environment()
 
@@ -29,7 +30,7 @@ def alert_instance(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                z_score_threshold=8.5, #If not set, defaults to 5
+                #z_score_threshold=50.0, #If not set, defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
@@ -66,21 +67,35 @@ def report(pipeline):
         #send message or cleaned_message
         benchmark_email.email(cleaned_message)
 
+def analyze_pipeline(pipeline, commit):
+    results_w_z_regressions = pipeline.run_pipeline()['GetConbenchZComparisonStep'].results_with_z_regressions
+    columns= [(str(regression.display_name)) for regression in results_w_z_regressions]
+    commit_df = pd.DataFrame(data=np.ones((1,len(columns))), index=[commit], columns=columns) #commit is a list
+    
+    return commit_df
+
 def alert() -> None:
 
     while True:
         with open(env.ASV_PROCESSED_FILES, "r+") as f:
             processed_files = f.read().split('\n')
-       
+        df = pd.DataFrame([]) 
+
         for new_file in (set(processed_files) - set(alerts_done_file(env))):   
             with open(new_file, "r") as f:           
                 benchmarks_results = json.load(f)
             pipeline = alert_instance(benchmarks_results['commit_hash'])
-            report(pipeline)
             
+            #report(pipeline) email report
+            
+            commit_df = analyze_pipeline(pipeline, benchmarks_results['commit_hash'])
+            df = pd.concat([df, commit_df])
+            
+
             with open(env.ALERT_PROCESSED_FILES, "a") as f:
                 f.write(new_file)
                 f.write("\n")
+        df.to_pickle('out.pkl')
         time.sleep(40)
         
 
