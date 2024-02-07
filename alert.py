@@ -15,6 +15,7 @@ from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
 import time
 import numpy as np
+import pathlib
 
 env = Environment()
 
@@ -30,7 +31,7 @@ def alert_instance(commit_hash):
                 #baseline_run_type=steps.BaselineRunCandidates.fork_point,
                 #baseline_run_type=steps.BaselineRunCandidates.latest_default,
                 baseline_run_type=steps.BaselineRunCandidates.parent,
-                #z_score_threshold=50.0, #If not set, defaults to 5
+                #z_score_threshold=6.0, #If not set, defaults to 5
             ),
             #steps.GitHubCheckStep(
             #    commit_hash=commit_hash,
@@ -75,13 +76,14 @@ def analyze_pipeline(pipeline, commit):
     return commit_df
 
 def alert() -> None:
-
+    df = pd.DataFrame(columns=["timestamp"])
     while True:
         with open(env.ASV_PROCESSED_FILES, "r+") as f:
             processed_files = f.read().split('\n')
-        df = pd.DataFrame([]) 
-
+         
         for new_file in (set(processed_files) - set(alerts_done_file(env))):   
+            timestamp = pathlib.Path(new_file).stat().st_birthtime
+            
             with open(new_file, "r") as f:           
                 benchmarks_results = json.load(f)
             pipeline = alert_instance(benchmarks_results['commit_hash'])
@@ -90,15 +92,13 @@ def alert() -> None:
             
             commit_df = analyze_pipeline(pipeline, benchmarks_results['commit_hash'])
             df = pd.concat([df, commit_df])
-            
-
+            df["timestamp"] = timestamp
             with open(env.ALERT_PROCESSED_FILES, "a") as f:
                 f.write(new_file)
                 f.write("\n")
         df.to_pickle('out.pkl')
-        time.sleep(40)
+        #time.sleep(40)
         
-
 if __name__ == "__main__":
     #commit_hash = 'acf5d7d84187b5ba53e54b2a5d91a34725814bf9' #old server
     #commit_hash = 'fce520d45a304ee2659bb4156acf484cee5aea07' #new server
