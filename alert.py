@@ -86,9 +86,11 @@ def alert() -> None:
     with open(env.ASV_PROCESSED_FILES, "r+") as f:
         processed_files = f.read().split('\n')
     for new_file in (set(processed_files) - set(alerts_done_file(env))):
-        print(new_file)
-        with open(new_file, "r") as f:
-            benchmarks_results = json.load(f)
+        try:
+            with open(new_file, "r") as f:
+                benchmarks_results = json.load(f)
+        except:
+            continue
         
         pipeline = alert_instance(benchmarks_results['commit_hash'])
         
