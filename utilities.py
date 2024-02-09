@@ -30,7 +30,6 @@ def check_new_files(env):
 
 def alerts_done_file(env):
 
-    _ , processed_files = check_new_files(env)
     with open(env.ALERT_PROCESSED_FILES, "r+") as f:
         alert_sent_files = f.read().split('\n')
     

@@ -82,23 +82,23 @@ def analyze_pipeline(pipeline, commit):
 
 def alert() -> None:
     df = pd.DataFrame()
-    while True:
-        with open(env.ASV_PROCESSED_FILES, "r+") as f:
-            processed_files = f.read().split('\n')
-
-        for new_file in (set(processed_files) - set(alerts_done_file(env))):
-            with open(new_file, "r") as f:
-                benchmarks_results = json.load(f)
-            pipeline = alert_instance(benchmarks_results['commit_hash'])
-            
-            # report(pipeline) email report
-
-            commit_df = analyze_pipeline(pipeline, benchmarks_results['commit_hash'])
-            df = pd.concat([df, commit_df])
-            with open(env.ALERT_PROCESSED_FILES, "a") as f:
-                f.write(new_file)
-                f.write("\n")
-        df.to_pickle('out.pkl')
+    #while True:
+    with open(env.ASV_PROCESSED_FILES, "r+") as f:
+        processed_files = f.read().split('\n')
+    for new_file in (set(processed_files) - set(alerts_done_file(env))):
+        print(new_file)
+        with open(new_file, "r") as f:
+            benchmarks_results = json.load(f)
+        
+        pipeline = alert_instance(benchmarks_results['commit_hash'])
+        
+        # report(pipeline) email report
+        commit_df = analyze_pipeline(pipeline, benchmarks_results['commit_hash'])
+        df = pd.concat([df, commit_df])
+        with open(env.ALERT_PROCESSED_FILES, "a") as f:
+            f.write(new_file)
+            f.write("\n")
+    df.to_pickle("./out.pkl")
         # time.sleep(40)
 
 
