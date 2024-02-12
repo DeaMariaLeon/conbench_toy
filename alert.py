@@ -82,6 +82,7 @@ def analyze_pipeline(pipeline, commit):
 
 def alert() -> None:
     df = pd.DataFrame()
+    save_df = False
     #while True:
     with open(env.ASV_PROCESSED_FILES, "r+") as f:
         processed_files = f.read().split('\n')
@@ -96,11 +97,17 @@ def alert() -> None:
         
         # report(pipeline) email report
         commit_df = analyze_pipeline(pipeline, benchmarks_results['commit_hash'])
-        df = pd.concat([df, commit_df])
+        try:
+            df = pd.concat([df, commit_df])
+            save_df = True
+        except:
+            print(benchmarks_results['commit_hash'])
+            save_df = False
         with open(env.ALERT_PROCESSED_FILES, "a") as f:
             f.write(new_file)
             f.write("\n")
-    df.to_pickle("./out.pkl")
+    if save_df:
+        df.to_pickle("./out.pkl")
         # time.sleep(40)
 
 
