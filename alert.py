@@ -13,6 +13,7 @@ from benchalerts.conbench_dataclasses import FullComparisonInfo
 import pandas as pd
 import numpy as np
 import pathlib
+from datetime import datetime
 
 env = Environment()
 
@@ -31,13 +32,14 @@ def alert_instance(commit_hash):
                 baseline_run_type=steps.BaselineRunCandidates.parent,
                 # z_score_threshold=6.0, #If not set, defaults to 5
             ),
-            # steps.GitHubCheckStep(
+            #steps.GitHubCheckStep(
             #     commit_hash=commit_hash,
             #     comparison_step_name="GetConbenchZComparisonStep",
             #     github_client=GitHubRepoClient(repo=repo),
             # ),
-            # steps.SlackMessageAboutBadCheckStep(
+            #steps.SlackMessageAboutBadCheckStep(
             #    channel_id="conbench-poc",
+            #    #check_step_name="GetConbenchZComparisonStep",
             # ),
 
             ],
@@ -69,14 +71,13 @@ def report(pipeline):
         benchmark_email.email(cleaned_message)
 
 
-def analyze_pipeline(pipeline, commit):
+def analyze_pipeline(pipeline, commit, date):
     analysis = pipeline.run_pipeline()['GetConbenchZComparisonStep']
     results_w_z_regressions = analysis.results_with_z_regressions
-    datetime = analysis.run_comparisons[0].contender_datetime
     columns = [(str(regression.display_name)) for regression in results_w_z_regressions]
     commit_df = pd.DataFrame(data=np.ones((1, len(columns))), index=[commit], columns=columns)  # commit is a list
-    commit_df.insert(0, "datetime",[pd.Timestamp(datetime)])
-
+    commit_df.insert(0, "datetime",[datetime.fromtimestamp(int(date)/1e3)])
+    
     return commit_df
 
 
@@ -84,7 +85,7 @@ def alert() -> None:
     df = pd.DataFrame()
     save_df = False
     #while True:
-    with open(env.ASV_PROCESSED_FILES, "r+") as f:
+    with open(env.ASV_PROCESSED_FILES, "r") as f:
         processed_files = f.read().split('\n')
     for new_file in (set(processed_files) - set(alerts_done_file(env))):
         try:
@@ -96,7 +97,10 @@ def alert() -> None:
         pipeline = alert_instance(benchmarks_results['commit_hash'])
         
         # report(pipeline) email report
-        commit_df = analyze_pipeline(pipeline, benchmarks_results['commit_hash'])
+        commit_df = analyze_pipeline(pipeline, 
+                                     benchmarks_results['commit_hash'],
+                                     benchmarks_results['date'],
+                                     )
         try:
             df = pd.concat([df, commit_df])
             save_df = True
