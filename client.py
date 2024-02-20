@@ -21,7 +21,7 @@ def adapter_instance(file_to_read) -> None:
 
 
 def post_data() -> None:
-   
+
    while True:
        all_files, processed_files = check_new_files(env)
        for new_file in (set(all_files) - set(processed_files)):
@@ -33,4 +33,3 @@ def post_data() -> None:
 
 if __name__=="__main__":
     post_data()
-        
