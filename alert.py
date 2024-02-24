@@ -53,16 +53,17 @@ def analyze_pipeline(pipeline, commit, date):
     with open("columns", "a") as f:
         f.write(str(columns))
     commit_df = pd.DataFrame(data=np.ones((1, len(columns))), index=[commit], columns=columns)  # commit is a list
-    commit_df.insert(0, "datetime",[datetime.fromtimestamp(int(date)/1e3)])
+    commit_df.insert(0, "datetime",[datetime.fromtimestamp(int(date)/1e3, tz=timezone.utc)])
 
     return commit_df
 
 def find_regressions(df, threshold=4):
-    df = df.fillna(0)
-    df = df.sort_values(by="datetime")
-    df = df.drop(columns='datetime')
+    df2 = df.copy()
+    df2 = df2.fillna(0)
+    df2 = df2.sort_values(by="datetime")
+    df2 = df2.drop(columns='datetime')
 
-    df2 = (df.rolling(threshold).sum() == threshold) & (df.rolling(threshold+1).sum() != threshold+1)
+    df2 = (df2.rolling(threshold).sum() == threshold) & (df2.rolling(threshold+1).sum() != threshold+1)
     df2 = df2.shift(1 - threshold)
     df2 = df2.where(df2)
     df2 = df2.dropna(axis='columns', how='all')
@@ -82,9 +83,11 @@ def save_commit_name(new_commit):
 
 def alert() -> None:
     
-    #df = pd.DataFrame()
-    df = pd.read_pickle(RESULTS_DATA_FRAME)
-    save_df = False
+    try:
+        df = pd.read_pickle(RESULTS_DATA_FRAME)
+    except:
+        df = pd.DataFrame()
+    
     processed_files = asv_commits_names()
     for new_commit in (set(processed_files) - set(alerts_done_file(env))):
         try:
@@ -107,9 +110,11 @@ def alert() -> None:
             
         save_commit_name(new_commit)
 
-
-    df.to_pickle(RESULTS_DATA_FRAME)
+    df.to_pickle("./out_all_rows.pkl") #used for testing - remove
+    threshold = 4
+    df.tail(threshold).to_pickle(RESULTS_DATA_FRAME)
     if len(df):
+        
         df2 = find_regressions(df)
         df2.to_excel(REGRESSIONS_DATA_FRAME)
         # report(pipeline) email report
