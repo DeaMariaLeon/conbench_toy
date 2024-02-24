@@ -2,7 +2,8 @@ from benchalerts import AlertPipeline, Alerter
 from benchalerts.integrations.github import CheckStatus
 import benchalerts.pipeline_steps as steps
 import benchmark_email
-from datetime import datetime
+from datetime import datetime, timezone
+from dateutil import tz
 import json
 import numpy as np
 import pandas as pd
@@ -12,9 +13,11 @@ from utilities import Environment, alerts_done_file
 env = Environment()
 
 repo = env.GITHUB_REPOSITORY
-input_file = env.ASV_PROCESSED_FILES
-output_file = env.ALERT_PROCESSED_FILES
-results_data_frame = "./out.pkl"
+asv_processed_files = env.ASV_PROCESSED_FILES
+alert_processed_files = env.ALERT_PROCESSED_FILES
+RESULTS_DATA_FRAME = "./out.pkl"
+REGRESSIONS_DATA_FRAME = "./reg.xlsx"
+
 
 def alert_instance(commit_hash):
 
@@ -54,26 +57,38 @@ def analyze_pipeline(pipeline, commit, date):
 
     return commit_df
 
-#def find_regressions(df):
+def find_regressions(df, threshold=4):
+    df = df.fillna(0)
+    df = df.sort_values(by="datetime")
+    df = df.drop(columns='datetime')
+
+    df2 = (df.rolling(threshold).sum() == threshold) & (df.rolling(threshold+1).sum() != threshold+1)
+    df2 = df2.shift(1 - threshold)
+    df2 = df2.where(df2)
+    df2 = df2.dropna(axis='columns', how='all')
+    df2 = df2.dropna(axis='index', how='all')
+    return df2
     
-def open_file(input_file):
-    with open(input_file, "r") as f:
+    
+def asv_commits_names():
+    with open(asv_processed_files, "r") as f:
         processed_files = f.read().split('\n')
     return processed_files
 
-def save_file(output_file, new_file):
-    with open(output_file, "a") as f:
-            f.write(new_file)
+def save_commit_name(new_commit):
+    with open(alert_processed_files, "a") as f:
+            f.write(new_commit)
             f.write("\n")
 
-def alert(input_file, output_file) -> None:
+def alert() -> None:
     
-    df = pd.read_pickle(results_data_frame)
+    #df = pd.DataFrame()
+    df = pd.read_pickle(RESULTS_DATA_FRAME)
     save_df = False
-    processed_files = open_file(input_file)
-    for new_file in (set(processed_files) - set(alerts_done_file(env))):
+    processed_files = asv_commits_names()
+    for new_commit in (set(processed_files) - set(alerts_done_file(env))):
         try:
-            with open(new_file, "r") as f:
+            with open(new_commit, "r") as f:
                 benchmarks_results = json.load(f)
         except:
             continue
@@ -86,18 +101,21 @@ def alert(input_file, output_file) -> None:
                                      )
         try:
             df = pd.concat([df, commit_df])
-            #find_regressions(df)
-            save_df = True
+              
         except:
             print(benchmarks_results['commit_hash'])
-            save_df = False
-        save_file(output_file, new_file)
-        
-    if save_df:
-        df.to_pickle(results_data_frame)
+            
+        save_commit_name(new_commit)
+
+
+    df.to_pickle(RESULTS_DATA_FRAME)
+    if len(df):
+        df2 = find_regressions(df)
+        df2.to_excel(REGRESSIONS_DATA_FRAME)
+        # report(pipeline) email report
     # time.sleep(40)
 
 
 if __name__ == "__main__":
 
-    alert(input_file, output_file)
+    alert()
