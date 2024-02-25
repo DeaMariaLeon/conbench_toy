@@ -3,7 +3,6 @@ from benchalerts.integrations.github import CheckStatus
 import benchalerts.pipeline_steps as steps
 import benchmark_email
 from datetime import datetime, timezone
-from dateutil import tz
 import json
 import numpy as np
 import pandas as pd
@@ -49,13 +48,17 @@ def report(pipeline):
 def analyze_pipeline(pipeline, commit, date):
     analysis = pipeline.run_pipeline()['GetConbenchZComparisonStep']
     results_w_z_regressions = analysis.results_with_z_regressions
-    columns = [(str(regression.display_name)) for regression in results_w_z_regressions]
-    with open("columns", "a") as f:
-        f.write(str(columns))
+    if results_w_z_regressions:
+        print("x")
+    results = [(str(regression.display_name), str(regression.link)) for regression in results_w_z_regressions]
+    links = [[result[1] for result in results]]
+    
+    columns = [result[0] for result in results]
+    links_df = pd.DataFrame(data=links, index=[commit], columns=columns)
     commit_df = pd.DataFrame(data=np.ones((1, len(columns))), index=[commit], columns=columns)  # commit is a list
     commit_df.insert(0, "datetime",[datetime.fromtimestamp(int(date)/1e3, tz=timezone.utc)])
 
-    return commit_df
+    return commit_df, links_df
 
 def find_regressions(df, threshold=4):
     df2 = df.copy()
@@ -98,7 +101,7 @@ def alert() -> None:
         pipeline = alert_instance(benchmarks_results['commit_hash'])
         
         # report(pipeline) email report
-        commit_df = analyze_pipeline(pipeline,
+        commit_df, links_df = analyze_pipeline(pipeline,
                                      benchmarks_results['commit_hash'],
                                      benchmarks_results['date'],
                                      )
@@ -111,6 +114,7 @@ def alert() -> None:
         save_commit_name(new_commit)
 
     df.to_pickle("./out_all_rows.pkl") #used for testing - remove
+    links_df.to_pickle("./links.pkl")
     threshold = 4
     df.tail(threshold).to_pickle(RESULTS_DATA_FRAME)
     if len(df):
