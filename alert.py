@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import json
 import numpy as np
 import pandas as pd
+from pathlib import Path
 import re
 from utilities import Environment, alerts_done_file
 
@@ -14,8 +15,12 @@ env = Environment()
 repo = env.GITHUB_REPOSITORY
 asv_processed_files = env.ASV_PROCESSED_FILES
 alert_processed_files = env.ALERT_PROCESSED_FILES
-RESULTS_DATA_FRAME = "./out.pkl"
-REGRESSIONS_DATA_FRAME = "./reg.xlsx"
+
+
+results_tail = Path.cwd().joinpath("output", "out.pkl") 
+regressions_excel = Path.cwd().joinpath("output", "reg.xlsx") 
+output_all_rows = Path.cwd().joinpath("output", "out_all_rows.pkl")  #used for testing
+all_links = Path.cwd().joinpath("output", "links.pkl") #used for testing
 
 
 def alert_instance(commit_hash):
@@ -48,11 +53,11 @@ def report(pipeline):
 def analyze_pipeline(pipeline, commit, date):
     analysis = pipeline.run_pipeline()['GetConbenchZComparisonStep']
     results_w_z_regressions = analysis.results_with_z_regressions
-    if results_w_z_regressions:
-        print("x")
-    results = [(str(regression.display_name), str(regression.link)) for regression in results_w_z_regressions]
-    links = [[result[1] for result in results]]
-    
+    results = [(str(regression.display_name),
+                str(regression.link),
+                str(regression.run_link),
+                ) for regression in results_w_z_regressions]
+    links = [[(result[1], result[2]) for result in results]]
     columns = [result[0] for result in results]
     links_df = pd.DataFrame(data=links, index=[commit], columns=columns)
     commit_df = pd.DataFrame(data=np.ones((1, len(columns))), index=[commit], columns=columns)  # commit is a list
@@ -72,8 +77,20 @@ def find_regressions(df, threshold=4):
     df2 = df2.dropna(axis='columns', how='all')
     df2 = df2.dropna(axis='index', how='all')
     return df2
+
+def clean_dict(df):
     
+    return { commit[0]: commit[1].dropna().to_dict() for  commit in df.iterrows()}
+
+def add_regression_links(regressions_df, links_df):
+    aligned_reg_df, aligned_links_df = regressions_df.align(links_df, join='left')
+    reg_links_df = aligned_links_df.where(aligned_reg_df)
+    reg_links_df.to_excel('./output/regression_links.xlsx')
+    reg_links_df.to_json('./output/regression_links.json', orient='index', indent=4)
     
+    with open('./output/cleaned_regression_file.json', 'w') as file:
+        json.dump(clean_dict(reg_links_df), file, indent=4)
+
 def asv_commits_names():
     with open(asv_processed_files, "r") as f:
         processed_files = f.read().split('\n')
@@ -87,9 +104,11 @@ def save_commit_name(new_commit):
 def alert() -> None:
     
     try:
-        df = pd.read_pickle(RESULTS_DATA_FRAME)
+        df = pd.read_pickle(results_tail)
+        links_df = pd.read_pickle(all_links)
     except:
         df = pd.DataFrame()
+        links_df = pd.DataFrame()
     
     processed_files = asv_commits_names()
     for new_commit in (set(processed_files) - set(alerts_done_file(env))):
@@ -101,26 +120,30 @@ def alert() -> None:
         pipeline = alert_instance(benchmarks_results['commit_hash'])
         
         # report(pipeline) email report
-        commit_df, links_df = analyze_pipeline(pipeline,
+        commit_row, links_row = analyze_pipeline(pipeline,
                                      benchmarks_results['commit_hash'],
                                      benchmarks_results['date'],
                                      )
         try:
-            df = pd.concat([df, commit_df])
+            df = pd.concat([df, commit_row])
+            links_df = pd.concat([links_df, links_row])
               
         except:
             print(benchmarks_results['commit_hash'])
             
         save_commit_name(new_commit)
 
-    df.to_pickle("./out_all_rows.pkl") #used for testing - remove
-    links_df.to_pickle("./links.pkl")
-    threshold = 4
-    df.tail(threshold).to_pickle(RESULTS_DATA_FRAME)
+    df.to_pickle(output_all_rows) #used for testing - remove
+    links_df.to_pickle(all_links)
+    threshold = 1
+    df.tail(threshold).to_pickle(results_tail)
     if len(df):
-        
-        df2 = find_regressions(df)
-        df2.to_excel(REGRESSIONS_DATA_FRAME)
+
+        regressions_df = find_regressions(df, threshold)
+        regressions_df.to_excel(regressions_excel)
+
+        add_regression_links(regressions_df, links_df)
+
         # report(pipeline) email report
     # time.sleep(40)
 

@@ -10,6 +10,15 @@ from datetime import datetime
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
 
+
+def benchmark_not_processed(name, commit):
+            #with open("benchmarks_not_run.txt", "r") as f:
+            #        not_run = f.read().split("\n")
+                #if name not in not_run:
+    with open("./output/benchmarks_not_run.txt", "a") as f:
+        log = " ".join([name, commit])
+        f.write(log)
+        f.write("\n")
 class AsvBenchmarkAdapter(BenchmarkAdapter):
 
     def __init__(
@@ -45,12 +54,12 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
             result_fields_override=result_fields_override,
             result_fields_append=result_fields_append,
         )
-    
+
     def _transform_results(self) -> List[BenchmarkResult]:
         """Transform asv results into a list of BenchmarkResults instances"""
         parsed_benchmarks = []
 
-        with open(self.result_file, "r") as f:           
+        with open(self.result_file, "r") as f:
             benchmarks_results = json.load(f)
 
         benchmarks_file = self.benchmarks_file_path + "benchmarks.json"
@@ -76,9 +85,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         for name in benchmarks_results["results"]:
             #Bug with this benchmark: series_methods.ToFrame.time_to_frame
             if name == "series_methods.ToFrame.time_to_frame":
-                continue
-            #print(name)
-            try:     
+            #    continue
+                 print("here")
+            try:
                 result_dict = dict(zip(result_columns, 
                                 benchmarks_results["results"][name]))
                 for param_values, data in zip(
@@ -86,10 +95,10 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     result_dict['result']
                     ):
                     if np.isnan(data):
-                            #print('failing ', name)
-                            continue   
+                            benchmark_not_processed(name)
+                            continue
                     param_dic = dict(zip(benchmarks_info[name]["param_names"],
-                                     param_values))      
+                                     param_values))
                     tags = {}
                     tags["name"] = name
                     tags.update(param_dic)
@@ -138,12 +147,15 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                              "cpu_l3_cache_bytes": 0,
                              "cpu_frequency_max_hz": 0,
                              "gpu_count": 0,
-                             "gpu_product_names": [],      
+                             "gpu_product_names": [],
                                }
                     )
                     parsed_benchmarks.append(parsed_benchmark)
             except:
+                benchmark_not_processed(name, benchmarks_results["commit_hash"])
                 continue
         
         return parsed_benchmarks
+    
+        
 
