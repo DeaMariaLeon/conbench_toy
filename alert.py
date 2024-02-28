@@ -134,7 +134,7 @@ def alert() -> None:
         save_commit_name(new_commit)
 
     df.to_pickle(output_all_rows) #used for testing - remove
-    links_df.to_pickle(all_links)
+    
     threshold = 1
     df.tail(threshold).to_pickle(results_tail)
     if len(df):
@@ -143,7 +143,8 @@ def alert() -> None:
         regressions_df.to_excel(regressions_excel)
 
         add_regression_links(regressions_df, links_df)
-
+        links_df = links_df[links_df.index.isin(regressions_df.index)]
+        links_df.tail(threshold).to_pickle(all_links)
         # report(pipeline) email report
     # time.sleep(40)
 
