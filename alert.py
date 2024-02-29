@@ -135,7 +135,7 @@ def alert() -> None:
 
     df.to_pickle(output_all_rows) #used for testing - remove
     
-    threshold = 1
+    threshold = 4
     df.tail(threshold).to_pickle(results_tail)
     if len(df):
 
