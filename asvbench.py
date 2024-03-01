@@ -5,20 +5,21 @@ import itertools
 import numpy as np
 import os
 from datetime import datetime
+import traceback
 
 
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
 
 
-def benchmark_not_processed(name, commit):
-            #with open("benchmarks_not_run.txt", "r") as f:
-            #        not_run = f.read().split("\n")
-                #if name not in not_run:
+def benchmark_not_processed(name, param_values): # Remove this
+            
     with open("./output/benchmarks_not_run.txt", "a") as f:
-        log = " ".join([name, commit])
+        log = " ".join([name])
         f.write(log)
+        f.write(str(param_values)+ " ")
         f.write("\n")
+
 class AsvBenchmarkAdapter(BenchmarkAdapter):
 
     def __init__(
@@ -79,23 +80,24 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         try:
            result_columns = benchmarks_results["result_columns"]
         except:
-           raise Exception("Incorrect file format") 
+           raise Exception("Incorrect file format")
         parsed_benchmarks = []
           
         for name in benchmarks_results["results"]:
-            #Bug with this benchmark: series_methods.ToFrame.time_to_frame
-            if name == "series_methods.ToFrame.time_to_frame":
-            #    continue
-                 print("here")
+            
             try:
-                result_dict = dict(zip(result_columns, 
+                # benchmarks_results["results"][name] bellow has either a list
+                # with items corresponding to each result of a parameters combination,
+                # or just one value if the benchmark has no parameters.
+                # "name" is the name of the benchmark
+                result_dict = dict(zip(result_columns,
                                 benchmarks_results["results"][name]))
                 for param_values, data in zip(
                     itertools.product(*result_dict["params"]),
                     result_dict['result']
                     ):
                     if np.isnan(data):
-                            benchmark_not_processed(name)
+                            benchmark_not_processed(name, param_values)
                             continue
                     param_dic = dict(zip(benchmarks_info[name]["param_names"],
                                      param_values))
@@ -113,12 +115,12 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                             #but it can be changed so it returns the value of each iteration
                             #if asv returns the value of each iteration, the variable "data"
                             #will be a list, so this needs to be addressed below
-                            "data": [data],  
+                            "data": [data],
                             "unit": units[benchmarks_info[name]['unit']],
                             #iterations below is for conbench, 1 if we only provide a value
                             #if we run asv to return the value of each iteration (in data above)
                             #iterations should match the number of values
-                            "iterations": 1, 
+                            "iterations": 1,
                         },
                         tags=tags,
                         context={"benchmark_language": "Python",
@@ -152,7 +154,10 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     )
                     parsed_benchmarks.append(parsed_benchmark)
             except:
-                benchmark_not_processed(name, benchmarks_results["commit_hash"])
+                # Change this
+
+                #print(traceback.format_exc())
+                #benchmark_not_processed(name, param_values, result_dict, benchmarks_results["commit_hash"])
                 continue
         
         return parsed_benchmarks
