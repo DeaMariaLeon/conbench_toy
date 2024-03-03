@@ -58,7 +58,7 @@ def analyze_pipeline(pipeline, commit, date):
                 str(regression.link),
                 str(regression.run_link),
                 ) for regression in results_w_z_regressions]
-    links = [[(result[1]) for result in results]]
+    links = [[(re.sub(r'0\.0\.0\.0', '57.128.112.95',result[1])) for result in results]]
     columns = [result[0] for result in results]
     links_df = pd.DataFrame(data=links, index=[commit], columns=columns)
     commit_df = pd.DataFrame(data=np.ones((1, len(columns))), index=[commit], columns=columns)  # commit is a list
@@ -136,7 +136,7 @@ def alert() -> None:
 
     df.to_pickle(output_all_rows) #used for testing - remove
     
-    threshold = 4
+    threshold = 1
     df.tail(threshold).to_pickle(results_tail)
     links_df.to_pickle(all_links)
     if len(df):
