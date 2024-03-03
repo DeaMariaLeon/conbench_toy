@@ -102,15 +102,8 @@ def save_commit_name(new_commit):
             f.write(new_commit)
             f.write("\n")
 
-def alert() -> None:
-    
-    try:
-        df = pd.read_pickle(results_tail)
-        links_df = pd.read_pickle(links_tail)
-    except:
-        df = pd.DataFrame()
-        links_df = pd.DataFrame()
-    
+def alert(df, links_df) -> None:
+
     processed_files = asv_commits_names()
     for new_commit in (set(processed_files) - set(alerts_done_file(env))):
         try:
@@ -152,5 +145,12 @@ def alert() -> None:
 
 
 if __name__ == "__main__":
+    
+    try:
+        df = pd.read_pickle(results_tail)
+        links_df = pd.read_pickle(links_tail)
+    except:
+        df = pd.DataFrame()
+        links_df = pd.DataFrame()
 
-    alert()
+    alert(df, links_df)
