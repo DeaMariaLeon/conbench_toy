@@ -11,15 +11,6 @@ import traceback
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
 
-
-def benchmark_not_processed(name, param_values): # Remove this
-            
-    with open("./output/benchmarks_not_run.txt", "a") as f:
-        log = " ".join([name])
-        f.write(log)
-        f.write(str(param_values)+ " ")
-        f.write("\n")
-
 class AsvBenchmarkAdapter(BenchmarkAdapter):
 
     def __init__(
@@ -97,7 +88,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     result_dict['result']
                     ):
                     if np.isnan(data):
-                            benchmark_not_processed(name, param_values)
+                            # Nan is generated in the results by pandas benchmarks
+                            # when a combination of parameters is not allowed.
+                            # In this case, the result is not sent to  the conbench webapp
                             continue
                     param_dic = dict(zip(benchmarks_info[name]["param_names"],
                                      param_values))
@@ -109,7 +102,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                              "bytes": "B"} 
                     params = benchmarks_results["params"]
                     parsed_benchmark = BenchmarkResult(
-                        #batch_id=str(self.result_file), #CORRECT THIS
+                        
                         stats={
                             #asv returns one value wich is the average of the iterations
                             #but it can be changed so it returns the value of each iteration
@@ -154,10 +147,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     )
                     parsed_benchmarks.append(parsed_benchmark)
             except:
-                # Change this
-
-                #print(traceback.format_exc())
-                #benchmark_not_processed(name, param_values, result_dict, benchmarks_results["commit_hash"])
+                # This happens if the name of the benchmark is
+                # not found in benchmarks.json
+                
                 continue
         
         return parsed_benchmarks

@@ -20,7 +20,8 @@ alert_processed_files = env.ALERT_PROCESSED_FILES
 results_tail = Path.cwd().joinpath("output", "out.pkl") 
 regressions_excel = Path.cwd().joinpath("output", "reg.xlsx") 
 output_all_rows = Path.cwd().joinpath("output", "out_all_rows.pkl")  #used for testing
-all_links = Path.cwd().joinpath("output", "links.pkl") #used for testing
+all_links = Path.cwd().joinpath("output", "all_links.pkl") #used for testing
+links_tail = Path.cwd().joinpath("output", "links_out.pkl")
 
 
 def alert_instance(commit_hash):
@@ -57,7 +58,7 @@ def analyze_pipeline(pipeline, commit, date):
                 str(regression.link),
                 str(regression.run_link),
                 ) for regression in results_w_z_regressions]
-    links = [[(result[1], result[2]) for result in results]]
+    links = [[(result[1]) for result in results]]
     columns = [result[0] for result in results]
     links_df = pd.DataFrame(data=links, index=[commit], columns=columns)
     commit_df = pd.DataFrame(data=np.ones((1, len(columns))), index=[commit], columns=columns)  # commit is a list
@@ -105,7 +106,7 @@ def alert() -> None:
     
     try:
         df = pd.read_pickle(results_tail)
-        links_df = pd.read_pickle(all_links)
+        links_df = pd.read_pickle(links_tail)
     except:
         df = pd.DataFrame()
         links_df = pd.DataFrame()
@@ -137,6 +138,7 @@ def alert() -> None:
     
     threshold = 4
     df.tail(threshold).to_pickle(results_tail)
+    links_df.to_pickle(all_links)
     if len(df):
 
         regressions_df = find_regressions(df, threshold)
@@ -144,7 +146,7 @@ def alert() -> None:
 
         add_regression_links(regressions_df, links_df)
         links_df = links_df[links_df.index.isin(regressions_df.index)]
-        links_df.tail(threshold).to_pickle(all_links)
+        links_df.tail(threshold).to_pickle(links_tail)
         # report(pipeline) email report
     # time.sleep(40)
 
