@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import re
+import traceback
 from utilities import Environment, alerts_done_file
 
 env = Environment()
@@ -84,7 +85,7 @@ def clean_dict(df):
     return { commit[0]: commit[1].dropna().to_dict() for  commit in df.iterrows()}
 
 def add_regression_links(regressions_df, links_df):
-    aligned_reg_df, aligned_links_df = regressions_df.align(links_df, join='left')
+    aligned_reg_df, aligned_links_df = regressions_df.align(links_df, join='left') # use update instead?
     reg_links_df = aligned_links_df.where(aligned_reg_df)
     reg_links_df.to_excel('./output/regression_links.xlsx')
     reg_links_df.to_json('./output/regression_links.json', orient='index', indent=4)
@@ -128,18 +129,18 @@ def alert(df, links_df) -> None:
         save_commit_name(new_commit)
 
     df.to_pickle(output_all_rows) #used for testing - remove
-    
+    links_df.to_pickle(all_links)
     threshold = 4
     df.tail(threshold).to_pickle(results_tail)
-    links_df.to_pickle(all_links)
+    links_df.tail(threshold).to_pickle(links_tail)
     if len(df):
 
         regressions_df = find_regressions(df, threshold)
         regressions_df.to_excel(regressions_excel)
 
         add_regression_links(regressions_df, links_df)
-        links_df = links_df[links_df.index.isin(regressions_df.index)]
-        links_df.tail(threshold).to_pickle(links_tail)
+        #links_df = links_df[links_df.index.isin(regressions_df.index)]
+        
         # report(pipeline) email report
     # time.sleep(40)
 
