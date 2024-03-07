@@ -49,7 +49,6 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
 
     def _transform_results(self) -> List[BenchmarkResult]:
         """Transform asv results into a list of BenchmarkResults instances"""
-        parsed_benchmarks = []
 
         with open(self.result_file, "r") as f:
             benchmarks_results = json.load(f)
@@ -90,13 +89,12 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     
                 else:
                     data_key = "result"
-                    iterations = 1
 
                 for param_values, data in zip(
                     itertools.product(*result_dict["params"]),
                     result_dict[data_key]
                     ):
-                    if not np.all(data):
+                    if np.any(np.isnan(data)):
                             # Nan is generated in the results by pandas benchmarks
                             # when a combination of parameters is not allowed.
                             # In this case, the result is not sent to  the conbench webapp
@@ -113,15 +111,17 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
 
                     if data_key == "result":
                         data = [data]
+                        iterations = 1
                     else:
                         iterations = len(data)
+
                     parsed_benchmark = BenchmarkResult(
                         
                         stats={
                             #asv returns one value wich is the average of the iterations
                             #but it can be changed so it returns the value of each iteration
                             #if asv returns the value of each iteration, the variable "data"
-                            #will be a list, so this needs to be addressed below
+                            #will be a list
                             "data": data,
                             "unit": units[benchmarks_info[name]['unit']],
                             #iterations below is for conbench, 1 if we only provide a value

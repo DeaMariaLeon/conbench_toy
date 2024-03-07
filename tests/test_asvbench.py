@@ -1,5 +1,6 @@
 import json
 import tempfile
+import numpy as np
 from pathlib import Path
 import pytest
 
@@ -83,6 +84,29 @@ benchmarks_json = {
         "version": "6a0d09a5d23eb6dc7d6bb95140476cc1c1a896640e9d7bd005861c59072edc0d",
         "warmup_time": -1
     },
+    "algorithms.SortIntegerArray.time_argsort": {
+        "code": "class SortIntegerArray:\n    def time_argsort(self, N):\n        self.array.argsort()\n\ndef setup(*args, **kwargs):\n    # This function just needs to be imported into each benchmark file to\n    # set up the random seed before each function.\n    # https://asv.readthedocs.io/en/latest/writing_benchmarks.html\n    np.random.seed(1234)\n\nclass SortIntegerArray:\n    def setup(self, N):\n        if N == 1:\n           raise NotImplementedError\n    \n        data = np.arange(N, dtype=float)\n        data[40] = np.nan\n        self.array = pd.array(data, dtype=\"Int64\")",
+        "min_run_count": 2,
+        "name": "algorithms.SortIntegerArray.time_argsort",
+        "number": 0,
+        "param_names": [
+            "param1"
+        ],
+        "params": [
+            [
+                "1000",
+                "100000",
+                "1"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "40aa122c3448a0c4db1b17a00f7b64ee18672679c258627dc894596ae752a9e0",
+        "warmup_time": -1
+    },
     "version": 2
 }
 
@@ -150,7 +174,7 @@ asv_json = {
     "version": 2
 }
 
-asv_json_with_param_andsamples = {
+asv_json_param_and_samples = {
     "commit_hash": "89b286a699b2d023b7a1ebc468abf230d84ad547",
     "env_name": "conda-py3.10-Cython3.0-jinja2-matplotlib-meson-meson-python-numba-numexpr-odfpy-openpyxl-pyarrow-pytables-python-build-scipy-sqlalchemy-xlrd-xlsxwriter",
     "date": 1709607034000,
@@ -359,6 +383,54 @@ asv_json_with_param_andsamples = {
                     0.00012786839038088192
                 ]
             ]
+        ],
+        "algorithms.SortIntegerArray.time_argsort": [
+            [
+                9.382720887127119e-06, 
+                0.0008135993461669737, 
+                np.NaN
+            ], 
+            [
+                [
+                    "1000", 
+                    "100000", 
+                    "1"
+                ]
+            ], 
+            "40aa122c3448a0c4db1b17a00f7b64ee18672679c258627dc894596ae752a9e0", 
+            1709835572798, 
+            2.3563, 
+            [
+                9.2976e-06, 
+                0.00079774, 
+                np.NaN
+                
+            ], 
+            [
+                9.5915e-06, 
+                0.00083937, 
+                np.NaN
+            ], 
+            [
+                9.3473e-06, 
+                0.00080488, 
+                np.NaN
+            ], 
+            [
+                9.4343e-06, 
+                0.00082726, 
+                np.NaN
+            ], 
+            [
+                1082, 
+                13, 
+                np.NaN
+            ], 
+            [
+                10, 
+                10, 
+                np.NaN
+            ]
         ]
     },
     
@@ -430,7 +502,7 @@ class TestAsvAdapter_with_param_andsamples:
         )
 
         with open(asv_adapter.result_file, "w") as f:
-            json.dump(asv_json_with_param_andsamples, f)
+            json.dump(asv_json_param_and_samples, f)
         
         name = tempdir.joinpath("benchmarks.json")
         with open(name, "w") as f:
@@ -441,8 +513,8 @@ class TestAsvAdapter_with_param_andsamples:
     def test_transform_results(self, asv_adapter) -> None:
         results = asv_adapter.transform_results()
 
-        assert len(results) == 5
-        assert len([res.tags["name"] for res in results]) == 5
+        assert len(results) == 7
+        assert len([res.tags["name"] for res in results]) == 7
         
         for result in results:
            match result.tags:
@@ -467,5 +539,21 @@ class TestAsvAdapter_with_param_andsamples:
                                                       1.6278026913333076e-05], 
                                                       'unit': 's', 
                                                       'iterations': 10}
-               case {'name': 'array.ArrowStringArray.time_setitem_slice'}:
+               case {'name': 'array.ArrowStringArray.time_setitem_slice', 
+                     'multiple_chunks': 'False'
+                     }:
                    assert len(result.stats["data"]) == 10
+               case {'name': 'array.ArrowStringArray.time_setitem_slice', 
+                     'multiple_chunks': 'True'
+                     }:
+                   assert len(result.stats["data"]) == 10
+
+               case {'name': 'algorithms.SortIntegerArray.time_argsort',
+                     'param1': '1000'
+                     }:
+                   assert result.stats["data"] == [9.382720887127119e-06]
+               case {'name': 'algorithms.SortIntegerArray.time_argsort',
+                     'param1': '100000'
+                     }:
+                   print(result)
+                   assert result.stats["data"] == [0.0008135993461669737]
