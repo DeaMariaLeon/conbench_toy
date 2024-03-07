@@ -19,7 +19,7 @@ def df_with_regressions(expected_regressions: str) -> pd.DataFrame:
 @pytest.mark.parametrize(
     "filename, expected_regressions",
     [
-        ("outFeb22.pkl", "output-test.pkl")
+        ("outFeb22.pkl", "output-test.pkl"),
     ],
 )
 

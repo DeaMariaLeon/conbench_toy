@@ -5,7 +5,7 @@ import itertools
 import numpy as np
 import os
 from datetime import datetime
-import traceback
+
 
 
 from benchadapt.adapters._adapter import BenchmarkAdapter
@@ -63,11 +63,13 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         return parsed_benchmarks
 
     def _parse_results(self, benchmarks_results, benchmarks_info):
-        # From asv documention "result_columns" is a list of column names for the results dictionary. 
-        # ["result", "params", "version", "started_at", "duration", "stats_ci_99_a", "stats_ci_99_b", 
-        # "stats_q_25", "stats_q_75", "stats_number", "stats_repeat", "samples", "profile"] 
-        # In this first version of the adapter we are using only the "result" column. 
-        # TODO: use the "samples" column instead.
+        """
+        From asv documention "result_columns" is a list of column names for the results dictionary. 
+        ["result", "params", "version", "started_at", "duration", "stats_ci_99_a", "stats_ci_99_b", 
+        "stats_q_25", "stats_q_75", "stats_number", "stats_repeat", "samples", "profile"] 
+        In this first version of the adapter we are using only the "result" column. 
+        TODO: use the "samples" column instead.
+        """
         try:
            result_columns = benchmarks_results["result_columns"]
         except:
@@ -83,11 +85,18 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                 # "name" is the name of the benchmark
                 result_dict = dict(zip(result_columns,
                                 benchmarks_results["results"][name]))
+                if "samples" in result_dict:
+                    data_key = "samples"
+                    
+                else:
+                    data_key = "result"
+                    iterations = 1
+
                 for param_values, data in zip(
                     itertools.product(*result_dict["params"]),
-                    result_dict['result']
+                    result_dict[data_key]
                     ):
-                    if np.isnan(data):
+                    if not np.all(data):
                             # Nan is generated in the results by pandas benchmarks
                             # when a combination of parameters is not allowed.
                             # In this case, the result is not sent to  the conbench webapp
@@ -101,6 +110,11 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     units = {"seconds": "s",
                              "bytes": "B"} 
                     params = benchmarks_results["params"]
+
+                    if data_key == "result":
+                        data = [data]
+                    else:
+                        iterations = len(data)
                     parsed_benchmark = BenchmarkResult(
                         
                         stats={
@@ -108,12 +122,12 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                             #but it can be changed so it returns the value of each iteration
                             #if asv returns the value of each iteration, the variable "data"
                             #will be a list, so this needs to be addressed below
-                            "data": [data],
+                            "data": data,
                             "unit": units[benchmarks_info[name]['unit']],
                             #iterations below is for conbench, 1 if we only provide a value
                             #if we run asv to return the value of each iteration (in data above)
                             #iterations should match the number of values
-                            "iterations": 1,
+                            "iterations": iterations,
                         },
                         tags=tags,
                         context={"benchmark_language": "Python",
@@ -151,7 +165,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                 # not found in benchmarks.json
                 
                 continue
-        
+
         return parsed_benchmarks
     
         
