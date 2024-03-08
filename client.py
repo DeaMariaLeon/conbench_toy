@@ -7,6 +7,8 @@ from utilities import Environment, check_new_files
 
 env = Environment()
 
+benchmarks_file_path = Path.cwd() / env.BENCHMARKS_FILE_PATH
+
 def adapter_instance(file_to_read) -> None:
     adapter = AsvBenchmarkAdapter(
     command=["echo", str(file_to_read)],
@@ -14,7 +16,7 @@ def adapter_instance(file_to_read) -> None:
     result_fields_override={
         "run_reason": env.CONBENCH_RUN_REASON,
     },
-    benchmarks_file_path=env.BENCHMARKS_FILE_PATH,
+    benchmarks_file_path=benchmarks_file_path,
     )
     adapter.run()
     adapter.post_results()

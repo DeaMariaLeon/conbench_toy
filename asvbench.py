@@ -17,7 +17,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         self,
         command: List[str],
         result_file: Path,
-        benchmarks_file_path: str,
+        benchmarks_file_path: Path,
         result_fields_override: Dict[str, Any] = None,
         result_fields_append: Dict[str, Any] = None,
     ) -> None:
@@ -53,7 +53,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         with open(self.result_file, "r") as f:
             benchmarks_results = json.load(f)
 
-        benchmarks_file = self.benchmarks_file_path + "benchmarks.json"
+        benchmarks_file = self.benchmarks_file_path / "benchmarks.json"
         with open(benchmarks_file) as f:
             benchmarks_info = json.load(f)
         

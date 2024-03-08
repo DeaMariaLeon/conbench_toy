@@ -450,13 +450,13 @@ class TestAsvAdapter:
         asv_adapter = AsvBenchmarkAdapter(
             command=["echo", "'Hello, world!'"],
             result_file=Path(result_file),
-            benchmarks_file_path=str(tempdir)+"/",
+            benchmarks_file_path=tempdir,
         )
 
         with open(asv_adapter.result_file, "w") as f:
             json.dump(asv_json, f)
         
-        name = tempdir.joinpath("benchmarks.json")
+        name = tempdir / "benchmarks.json"
         with open(name, "w") as f:
             json.dump(benchmarks_json, f)
 
@@ -498,7 +498,7 @@ class TestAsvAdapter_with_param_andsamples:
         asv_adapter = AsvBenchmarkAdapter(
             command=["echo", "'Hello, world!'"],
             result_file=Path(result_file),
-            benchmarks_file_path=str(tempdir)+"/",
+            benchmarks_file_path=tempdir,
         )
 
         with open(asv_adapter.result_file, "w") as f:
