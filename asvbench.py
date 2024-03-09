@@ -6,8 +6,6 @@ import numpy as np
 import os
 from datetime import datetime
 
-
-
 from benchadapt.adapters._adapter import BenchmarkAdapter
 from benchadapt.result import BenchmarkResult
 
@@ -63,7 +61,6 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
         ["result", "params", "version", "started_at", "duration", "stats_ci_99_a", "stats_ci_99_b", 
         "stats_q_25", "stats_q_75", "stats_number", "stats_repeat", "samples", "profile"] 
         In this first version of the adapter we are using only the "result" column. 
-        TODO: use the "samples" column instead.
         """
         try:
            result_columns = benchmarks_results["result_columns"]
