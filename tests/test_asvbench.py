@@ -107,6 +107,32 @@ benchmarks_json = {
         "version": "40aa122c3448a0c4db1b17a00f7b64ee18672679c258627dc894596ae752a9e0",
         "warmup_time": -1
     },
+    "series_methods.ToFrame.time_to_frame": {
+        "code": "class ToFrame:\n    def time_to_frame(self, dtype, name):\n        self.ser.to_frame(name)\n\ndef setup(*args, **kwargs):\n    def setup(self, dtype, name):\n        arr = np.arange(10**5)\n        ser = Series(arr, dtype=dtype)\n        self.ser = ser",
+        "min_run_count": 2,
+        "name": "series_methods.ToFrame.time_to_frame",
+        "number": 0,
+        "param_names": [
+            "dtype",
+            "name"
+        ],
+        "params": [
+            [
+                "'int64'",
+            ],
+            [
+                "None",
+                "'foo'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "9837bd38099b9a8813a9b22a59b46e9e9afd7614361947eb24b302192b97eb20",
+        "warmup_time": -1
+    },
     "version": 2
 }
 
@@ -431,7 +457,25 @@ asv_json_param_and_samples = {
                 10, 
                 np.NaN
             ]
-        ]
+        ],
+        "series_methods.ToFrame.time_to_frame": 
+        [
+            [
+                1.4953170287206877e-05, 
+                1.495111301503055e-05
+            ], 
+            [
+                [
+                    "'int64'"
+                ], 
+                [
+                    "None", 
+                    "'foo'"
+                ]
+            ], 
+            "9837bd38099b9a8813a9b22a59b46e9e9afd7614361947eb24b302192b97eb20",
+            
+    ],
     },
     
     "durations": {},
@@ -463,6 +507,7 @@ class TestAsvAdapter:
         return asv_adapter
     
     def test_transform_results(self, asv_adapter) -> None:
+        """ This tests basic case: no params, no samples, only one benchmark. """
         results = asv_adapter.transform_results()
        
         assert len(results) == 1
@@ -511,23 +556,32 @@ class TestAsvAdapter_with_param_andsamples:
         return asv_adapter
     
     def test_transform_results(self, asv_adapter) -> None:
+        # The structure of asv benchmarks change depending on the use
+        # of samples (called "iterations" in conbenchand) and/or parameters 
+        # (called "cases" for conbench). So here testing for different combinations.
         results = asv_adapter.transform_results()
-
-        assert len(results) == 7
-        assert len([res.tags["name"] for res in results]) == 7
+        print(results)
+        assert len(results) == 9
+        assert len([res.tags["name"] for res in results]) == 9
         
-        for result in results:
-           match result.tags:
+        for res in results:
+           
+           match res.tags:
+               # Benchmark strings.Repeat.time_repeat uses two parameters or cases
+               # ('int' and 'array') but no samples. It must return two results.
                case {'name': 'strings.Repeat.time_repeat', 'repeats': "'int'"}:
-                   assert result.stats == {'data': [0.03481033350544749],
+                   assert res.stats == {'data': [0.03481033350544749],
                                           'unit': 's',
                                           'iterations': 1}
                case {'name': 'strings.Repeat.time_repeat', 'repeats': "'array'"}:
-                   assert result.stats == {'data': [0.03935433350125095], 
+                   assert res.stats == {'data': [0.03935433350125095], 
                                             'unit': 's', 
                                             'iterations': 1}
+              
+               # Benchmark 'boolean.TimeLogicalOps.time_or_scalar' uses samples 
+               # (iterations) but no parameters. It must return a list with these values.
                case {'name': 'boolean.TimeLogicalOps.time_or_scalar'}:
-                   assert result.stats == {'data': [1.6370204791373757e-05, 
+                   assert res.stats == {'data': [1.6370204791373757e-05, 
                                                       1.64747757895297e-05, 
                                                       1.6352142014517064e-05, 
                                                       1.6375186853806846e-05, 
@@ -539,21 +593,44 @@ class TestAsvAdapter_with_param_andsamples:
                                                       1.6278026913333076e-05], 
                                                       'unit': 's', 
                                                       'iterations': 10}
+               # Benchmark array.ArrowStringArray.time_setitem_slice uses samples
+               # and parameters
                case {'name': 'array.ArrowStringArray.time_setitem_slice', 
                      'multiple_chunks': 'False'
                      }:
-                   assert len(result.stats["data"]) == 10
+                   assert len(res.stats["data"]) == 10
                case {'name': 'array.ArrowStringArray.time_setitem_slice', 
                      'multiple_chunks': 'True'
                      }:
-                   assert len(result.stats["data"]) == 10
-
+                   assert len(res.stats["data"]) == 10
+     
+               # Benchmark algorithms.SortIntegerArray.time_argsort tests that
+               # NaN results still generate the rest for the data and the adapter
+               # doesn't break. (A very common case).
                case {'name': 'algorithms.SortIntegerArray.time_argsort',
                      'param1': '1000'
                      }:
-                   assert result.stats["data"] == [9.382720887127119e-06]
+                   assert res.stats["data"] == [9.382720887127119e-06]
                case {'name': 'algorithms.SortIntegerArray.time_argsort',
                      'param1': '100000'
                      }:
-                   print(result)
-                   assert result.stats["data"] == [0.0008135993461669737]
+                   assert res.stats["data"] == [0.0008135993461669737]
+
+               # Benchmark series_methods.ToFrame.time_to_frame tests that 
+               # a parameter or case is not called "name". (This was generating a bug).
+               case {'name': 'series_methods.ToFrame.time_to_frame',
+                     'dtype': "'int64'", 
+                     'name_': "'foo'"
+                     }:
+                   assert res.stats["data"] == [1.495111301503055e-05]
+               case {'name': 'series_methods.ToFrame.time_to_frame',
+                     'dtype': "'int64'", 
+                     'name_': "None"
+                     }:
+                   assert res.stats["data"] == [1.4953170287206877e-05]
+               # A result may pass the test of len above (the number of results)
+               # but here checking that the names of benchmarks are still correct.
+               case _ :
+                   assert False
+               
+    
