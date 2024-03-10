@@ -11,7 +11,7 @@ from benchadapt.result import BenchmarkResult
 
 benchmarks_json = {
     "benchmarks.TimeSuite.time_insertion_sort": {
-        "code": "class TimeSuite:\n    def time_insertion_sort(self):\n        sort(self.array)\n\n    def setup(self):\n        LENGTH = 10\n        self.array = [random.randint(0, 1000) for i in range(LENGTH)]",
+        "code": "class TimeSuite:\n    def time_insertion_sort(self):\n        rest_of_the_code",
         "min_run_count": 2,
         "name": "benchmarks.TimeSuite.time_insertion_sort",
         "number": 4,
@@ -26,7 +26,7 @@ benchmarks_json = {
         "warmup_time": -1
     },
     "strings.Repeat.time_repeat": {
-        "code": "class Repeat:\n    def time_repeat(self, repeats):\n        self.s.str.repeat(self.values)\n\n    def setup(self, repeats):\n        N = 10**5\n        self.s = Series(Index([f\"i-{i}\" for i in range(N)], dtype=object))\n        repeat = {\"int\": 1, \"array\": np.random.randint(1, 3, N)}\n        self.values = repeat[repeats]",
+        "code": "class Repeat:\n    def time_repeat(self, repeats):\n        rest_of_the_code",
         "min_run_count": 2,
         "name": "strings.Repeat.time_repeat",
         "number": 0,
@@ -48,7 +48,7 @@ benchmarks_json = {
         "warmup_time": -1
     },
     "boolean.TimeLogicalOps.time_or_scalar": {
-        "code": "class TimeLogicalOps:\n    def time_or_scalar(self):\n        self.left | True\n        self.left | False\n\n    def setup(self):\n        N = 10_000\n        left, right, lmask, rmask = np.random.randint(0, 2, size=(4, N)).astype(\"bool\")\n        self.left = pd.arrays.BooleanArray(left, lmask)\n        self.right = pd.arrays.BooleanArray(right, rmask)",
+        "code": "class TimeLogicalOps:\n    def time_or_scalar(self):\n ",
         "min_run_count": 2,
         "name": "boolean.TimeLogicalOps.time_or_scalar",
         "number": 0,
@@ -63,7 +63,7 @@ benchmarks_json = {
         "warmup_time": -1
     },
     "array.ArrowStringArray.time_setitem_slice": {
-        "code": "class ArrowStringArray:\n    def time_setitem_slice(self, multiple_chunks):\n        self.array[::10] = \"foo\"\n\n    def setup(self, multiple_chunks):\n        try:\n            import pyarrow as pa\n        except ImportError as err:\n            raise NotImplementedError from err\n        strings = np.array([str(i) for i in range(10_000)], dtype=object)\n        if multiple_chunks:\n            chunks = [strings[i : i + 100] for i in range(0, len(strings), 100)]\n            self.array = pd.arrays.ArrowStringArray(pa.chunked_array(chunks))\n        else:\n            self.array = pd.arrays.ArrowStringArray(pa.array(strings))",
+        "code": "class ArrowStringArray:\n    def time_setitem_slice(self, chunks):\n        rest_of_the_code",
         "min_run_count": 2,
         "name": "array.ArrowStringArray.time_setitem_slice",
         "number": 0,
@@ -85,7 +85,7 @@ benchmarks_json = {
         "warmup_time": -1
     },
     "algorithms.SortIntegerArray.time_argsort": {
-        "code": "class SortIntegerArray:\n    def time_argsort(self, N):\n        self.array.argsort()\n\ndef setup(*args, **kwargs):\n    # This function just needs to be imported into each benchmark file to\n    # set up the random seed before each function.\n    # https://asv.readthedocs.io/en/latest/writing_benchmarks.html\n    np.random.seed(1234)\n\nclass SortIntegerArray:\n    def setup(self, N):\n        if N == 1:\n           raise NotImplementedError\n    \n        data = np.arange(N, dtype=float)\n        data[40] = np.nan\n        self.array = pd.array(data, dtype=\"Int64\")",
+        "code": "class SortIntegerArray:\n    def time_argsort(self, N):\n        rest_of_the_code",
         "min_run_count": 2,
         "name": "algorithms.SortIntegerArray.time_argsort",
         "number": 0,
@@ -108,7 +108,7 @@ benchmarks_json = {
         "warmup_time": -1
     },
     "series_methods.ToFrame.time_to_frame": {
-        "code": "class ToFrame:\n    def time_to_frame(self, dtype, name):\n        self.ser.to_frame(name)\n\ndef setup(*args, **kwargs):\n    def setup(self, dtype, name):\n        arr = np.arange(10**5)\n        ser = Series(arr, dtype=dtype)\n        self.ser = ser",
+        "code": "class ToFrame:\n    def time_to_frame(self, dtype, name):\n        rest_of_the_code",
         "min_run_count": 2,
         "name": "series_methods.ToFrame.time_to_frame",
         "number": 0,
@@ -202,7 +202,7 @@ asv_json = {
 
 asv_json_param_and_samples = {
     "commit_hash": "89b286a699b2d023b7a1ebc468abf230d84ad547",
-    "env_name": "conda-py3.10-Cython3.0-jinja2-matplotlib-meson-meson-python-numba-numexpr-odfpy-openpyxl-pyarrow-pytables-python-build-scipy-sqlalchemy-xlrd-xlsxwriter",
+    "env_name": "conda-py3.10-Cython3.0-jinja2-matplotlib ...",
     "date": 1709607034000,
     "params": {
         "arch": "arm64",
