@@ -55,7 +55,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
  
         return parsed_benchmarks
 
-    def _parse_results(self, benchmarks_results, benchmarks_info):
+    def _parse_results(self, benchmarks_results:str, benchmarks_info:str) -> List[BenchmarkResult]:
         """
         From asv documention "result_columns" is a list of column names for the results dictionary. 
         ["result", "params", "version", "started_at", "duration", "stats_ci_99_a", "stats_ci_99_b", 
@@ -164,7 +164,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                 # be updated after benchmarks are changed (by the
                 # user of asv).
                 continue
-
+            
         return parsed_benchmarks
     
         

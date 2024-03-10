@@ -514,7 +514,6 @@ class TestAsvAdapter:
         assert len(set(res.tags["name"] for res in results)) == 1
         assert len(set(res.batch_id for res in results)) == 1
         for result in results:
-        
             assert isinstance(result, BenchmarkResult)
             assert isinstance(result.run_name, str)
             assert result.tags["name"].endswith("time_insertion_sort")
@@ -522,13 +521,15 @@ class TestAsvAdapter:
                                       'env_name': 'conda-py3.10',
                                       'python': '3.10',
                                       'requirements': {}}
-            
             assert result.machine_info is not None
             assert result.stats == {'data': [1.2035623905003376],
                                     'unit': 's',
                                     'iterations': 1}
             assert result.github['commit'] == '0d24f201cc2506de45a2ed688d9f72f7123d58f7'
 
+    def test_run(self, asv_adapter) -> None:
+        results = asv_adapter.run()
+        assert len(results) == 1
 
 class TestAsvAdapter_with_param_andsamples:
     @pytest.fixture
@@ -560,7 +561,6 @@ class TestAsvAdapter_with_param_andsamples:
         # of samples (called "iterations" in conbenchand) and/or parameters 
         # (called "cases" for conbench). So here testing for different combinations.
         results = asv_adapter.transform_results()
-        print(results)
         assert len(results) == 9
         assert len([res.tags["name"] for res in results]) == 9
         
@@ -632,5 +632,7 @@ class TestAsvAdapter_with_param_andsamples:
                # but here checking that the names of benchmarks are still correct.
                case _ :
                    assert False
-               
-    
+
+    def test_run(self, asv_adapter) -> None:
+        results = asv_adapter.run()
+        assert len(results) == 9
