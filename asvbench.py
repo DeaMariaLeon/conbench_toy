@@ -94,9 +94,9 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     tags = {}    
                     tags["name"] = benchmark_name
 
-                    # For conbench, "name" is a key reserved for tags, but if there is a 
-                    # parameter (or case) called "name", it overrides tags["name"]. And 
-                    # the parameter becomes the benchmark_name. Hence this check:
+                    # For conbench, "name" is a key reserved for tags. But if there is a 
+                    # parameter or case called "name", it overrides tags["name"]. So 
+                    # the benchmark_name gets lost. Hence this check:
                     if "name" in param_dic:
                         param_dic["name_"] = param_dic["name"]
                         del param_dic["name"]
@@ -110,7 +110,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                     # Asv returns one value wich is the average of the samples 
                     # (called iterations in conbench). But this can be changed.
                     # Using asv run flag --append-samples or --record-samples,
-                    # asv returns the value of each iteration. In this case
+                    # it returns the value of each iteration. In this case
                     # "data" will be a list. 
                     # Also, iterations should be 1 if asv provides the average, but
                     # if we run asv to return each iteration,
@@ -162,7 +162,7 @@ class AsvBenchmarkAdapter(BenchmarkAdapter):
                 # This happens if the name of the benchmark is
                 # not found in benchmarks.json. This file should
                 # be updated after benchmarks are changed (by the
-                # user of asv).
+                # asv user).
                 continue
             
         return parsed_benchmarks
