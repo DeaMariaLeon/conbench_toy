@@ -23,7 +23,7 @@ regressions_excel = Path.cwd().joinpath("output", "reg.xlsx")
 output_all_rows = Path.cwd().joinpath("output", "out_all_rows.pkl")  #used for testing
 all_links = Path.cwd().joinpath("output", "all_links.pkl") #used for testing
 links_tail = Path.cwd().joinpath("output", "links_out.pkl")
-
+cleaned_regression_file = Path.cwd().joinpath("output", "cleaned_regression_file.json")
 
 def alert_instance(commit_hash):
 
@@ -90,8 +90,9 @@ def add_regression_links(regressions_df, links_df):
     reg_links_df.to_excel('./output/regression_links.xlsx')
     reg_links_df.to_json('./output/regression_links.json', orient='index', indent=4)
     
-    with open('./output/cleaned_regression_file.json', 'w') as file:
-        json.dump(clean_dict(reg_links_df), file, indent=4)
+    return reg_links_df
+    
+    
 
 def asv_commits_names():
     with open(asv_processed_files, "r") as f:
@@ -138,7 +139,12 @@ def alert(df, links_df) -> None:
         regressions_df = find_regressions(df, threshold)
         regressions_df.to_excel(regressions_excel)
 
-        add_regression_links(regressions_df, links_df)
+        reg_links_df = add_regression_links(regressions_df, links_df)
+        if not reg_links_df.empty:
+       
+            with open(cleaned_regression_file, 'w') as file:
+                json.dump(clean_dict(reg_links_df), file, indent=4)
+
         #links_df = links_df[links_df.index.isin(regressions_df.index)]
         
         # report(pipeline) email report
