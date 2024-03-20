@@ -17,6 +17,7 @@ repo = env.GITHUB_REPOSITORY
 asv_processed_files = env.ASV_PROCESSED_FILES
 alert_processed_files = env.ALERT_PROCESSED_FILES
 
+threshold = 4
 
 results_tail = Path.cwd().joinpath("output", "out.pkl") 
 regressions_excel = Path.cwd().joinpath("output", "reg.xlsx") 
@@ -91,8 +92,7 @@ def add_regression_links(regressions_df, links_df):
     reg_links_df.to_json('./output/regression_links.json', orient='index', indent=4)
     
     return reg_links_df
-    
-    
+
 
 def asv_commits_names():
     with open(asv_processed_files, "r") as f:
@@ -131,7 +131,6 @@ def alert(df, links_df) -> None:
 
     df.to_pickle(output_all_rows) #used for testing - remove
     links_df.to_pickle(all_links)
-    threshold = 4
     df.tail(threshold).to_pickle(results_tail)
     links_df.tail(threshold).to_pickle(links_tail)
     if len(df):
@@ -140,19 +139,22 @@ def alert(df, links_df) -> None:
         regressions_df.to_excel(regressions_excel)
 
         reg_links_df = add_regression_links(regressions_df, links_df)
-        if not reg_links_df.empty:
-       
-            with open(cleaned_regression_file, 'w') as file:
-                json.dump(clean_dict(reg_links_df), file, indent=4)
-
-        #links_df = links_df[links_df.index.isin(regressions_df.index)]
         
-        # report(pipeline) email report
+        if len(reg_links_df):
+            
+            cleaned_reg_links_df = clean_dict(reg_links_df)
+            with open(cleaned_regression_file, 'w') as file:
+                json.dump(cleaned_reg_links_df, file, indent=4)
+            message = """Subject: Benchmarks Alert \n\n """ \
+            + json.dumps(cleaned_reg_links_df, indent=4)
+            
+            benchmark_email.email(message)
+
     # time.sleep(40)
 
 
 if __name__ == "__main__":
-    
+
     try:
         df = pd.read_pickle(results_tail)
         links_df = pd.read_pickle(links_tail)
