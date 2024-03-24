@@ -19,8 +19,7 @@ alert_processed_files = env.ALERT_PROCESSED_FILES
 
 threshold = 4
 
-results_tail = Path.cwd().joinpath("output", "out.pkl") 
-regressions_excel = Path.cwd().joinpath("output", "reg.xlsx") 
+results_tail = Path.cwd().joinpath("output", "out.pkl")
 output_all_rows = Path.cwd().joinpath("output", "out_all_rows.pkl")  #used for testing
 all_links = Path.cwd().joinpath("output", "all_links.pkl") #used for testing
 links_tail = Path.cwd().joinpath("output", "links_out.pkl")
@@ -40,22 +39,7 @@ def alert_instance(commit_hash):
     return pipeline
 
 
-def report(pipeline):
-    full_comparison_info = \
-        pipeline.run_pipeline()['GetConbenchZComparisonStep']
-    alerter = Alerter()
-    if alerter.github_check_status(full_comparison_info) == CheckStatus.FAILURE:
-        message = """Subject: Benchmarks Alert \n\n """ \
-                  + alerter.github_check_summary(full_comparison_info, "")
-        correctserver = re.sub(r'0\.0\.0\.0', '57.128.112.95', message)  # new server
-        cleaned_message = re.sub(r'- Commit Run.+\)|#| All benchmark runs analyzed:', '', correctserver)
-        # send message or cleaned_message
-        benchmark_email.email(cleaned_message)
-
-
-def analyze_pipeline(pipeline, commit, date):
-    analysis = pipeline.run_pipeline()['GetConbenchZComparisonStep']
-    results_w_z_regressions = analysis.results_with_z_regressions
+def analyze_pipeline(results_w_z_regressions, commit, date):
     results = [(str(regression.display_name),
                 str(regression.link),
                 str(regression.run_link),
@@ -88,8 +72,6 @@ def clean_dict(df):
 def add_regression_links(regressions_df, links_df):
     aligned_reg_df, aligned_links_df = regressions_df.align(links_df, join='left') # use update instead?
     reg_links_df = aligned_links_df.where(aligned_reg_df)
-    reg_links_df.to_excel('./output/regression_links.xlsx')
-    reg_links_df.to_json('./output/regression_links.json', orient='index', indent=4)
     
     return reg_links_df
 
@@ -114,9 +96,10 @@ def alert(df, links_df) -> None:
         except:
             continue
         pipeline = alert_instance(benchmarks_results['commit_hash'])
-        
+        analysis = pipeline.run_pipeline()['GetConbenchZComparisonStep']
+        results_w_z_regressions = analysis.results_with_z_regressions
         # report(pipeline) email report
-        commit_row, links_row = analyze_pipeline(pipeline,
+        commit_row, links_row = analyze_pipeline(results_w_z_regressions,
                                      benchmarks_results['commit_hash'],
                                      benchmarks_results['date'],
                                      )
@@ -136,10 +119,8 @@ def alert(df, links_df) -> None:
     if len(df):
 
         regressions_df = find_regressions(df, threshold)
-        regressions_df.to_excel(regressions_excel)
-
         reg_links_df = add_regression_links(regressions_df, links_df)
-        
+
         if len(reg_links_df):
             
             cleaned_reg_links_df = clean_dict(reg_links_df)
