@@ -114,8 +114,8 @@ def alert(df, links_df) -> None:
 
     df.to_pickle(output_all_rows) #used for testing - remove
     links_df.to_pickle(all_links)
-    df.tail(threshold).to_pickle(results_tail)
-    links_df.tail(threshold).to_pickle(links_tail)
+    df.tail(threshold + 1).to_pickle(results_tail)
+    links_df.tail(threshold + 1).to_pickle(links_tail)
     if len(df):
 
         regressions_df = find_regressions(df, threshold)
