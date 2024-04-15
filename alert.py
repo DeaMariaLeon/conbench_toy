@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import re
-import traceback
 from utilities import Environment, alerts_done_file
 
 env = Environment()
@@ -130,8 +129,6 @@ def alert(df, links_df) -> None:
             + json.dumps(cleaned_reg_links_df, indent=4)
             
             benchmark_email.email(message)
-
-    # time.sleep(40)
 
 
 if __name__ == "__main__":
